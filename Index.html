@@ -4,16 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Daily Class & Batch Tracker</title>
+    <title>TrackerPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        brand: { 50: '#f0f4ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
-                    }
+                    colors: { brand: { 50: '#f0f4ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' } }
                 }
             }
         }
@@ -24,65 +22,62 @@
         
         .modal-enter { animation: modalFadeIn 0.3s ease-out forwards; }
         .modal-exit { animation: modalFadeOut 0.2s ease-in forwards; }
-        
         @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes modalFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
 
         body { padding-bottom: 80px; background-color: #f8fafc; }
-
-        /* Custom checkmark animation */
+        
+        /* Custom Checkbox Animations */
         .check-anim { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        input[type="checkbox"]:checked + div { background-color: #10b981; border-color: #10b981; }
-        input[type="checkbox"]:checked + div svg { opacity: 1; transform: scale(1); }
+        input[type="checkbox"].done-check:checked + div { background-color: #10b981; border-color: #10b981; }
+        input[type="checkbox"].done-check:checked + div svg { opacity: 1; transform: scale(1); }
+
+        /* Day Selector for Repeat Classes */
+        .day-label input:checked + div { background-color: #4f46e5; color: white; border-color: #4f46e5; }
+        
+        /* Circular Progress */
+        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
+        .circle-bg { fill: none; stroke: #e2e8f0; stroke-width: 3.8; }
+        .circle { fill: none; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
     </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen">
-
-<!-- TOP NAV / BANNER -->
-<div class="bg-white px-6 py-4 shadow-sm sticky top-0 z-30 flex justify-between items-center">
-    <div class="flex items-center gap-2">
-        <div class="bg-brand-100 text-brand-600 w-8 h-8 rounded-full flex items-center justify-center font-bold">
-            <i class="fa-solid fa-graduation-cap"></i>
-        </div>
-        <h1 class="text-xl font-extrabold tracking-tight text-slate-800">Tracker<span class="text-brand-600">Pro</span></h1>
-    </div>
-    <div class="flex gap-3">
-        <button onclick="window.openModal('classModal')" class="bg-brand-600 text-white w-8 h-8 rounded-full shadow-md flex items-center justify-center hover:bg-brand-700 transition">
-            <i class="fa-solid fa-plus"></i>
-        </button>
-    </div>
-</div>
 
 <div class="max-w-2xl mx-auto p-4 space-y-6">
 
     <!-- ================= PAGE 1: HOME ================= -->
     <main id="page-home" class="page-content block space-y-6">
-        
-        <!-- Promo / Welcome Banner -->
-        <div class="bg-gradient-to-r from-brand-600 to-indigo-800 rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
-            <div class="relative z-10">
-                <p class="text-brand-100 text-sm font-semibold uppercase tracking-wider mb-1">Welcome Back</p>
-                <h2 class="text-2xl font-bold mb-2">Track Your Success</h2>
-                <p class="text-sm opacity-90 max-w-[80%]">Manage your college degrees, batches, and notes all in one place.</p>
+        <!-- New Contextual Header -->
+        <header class="flex justify-between items-center pt-2">
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Scholar 👋</h1>
+                <p class="text-sm text-slate-500 font-medium" id="homeDateDisplay"></p>
             </div>
-            <i class="fa-solid fa-book-open-reader absolute -bottom-4 -right-4 text-8xl text-white opacity-10"></i>
+            <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm border-2 border-white">
+                <i class="fa-solid fa-user-graduate text-xl"></i>
+            </div>
+        </header>
+        
+        <!-- Motivational Banner -->
+        <div class="bg-gradient-to-r from-brand-600 to-indigo-800 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <div class="relative z-10">
+                <p class="text-brand-200 text-xs font-bold uppercase tracking-widest mb-2"><i class="fa-solid fa-quote-left mr-1"></i> Quote of the Day</p>
+                <h2 id="dailyQuote" class="text-lg font-bold leading-tight italic max-w-[90%]"></h2>
+            </div>
+            <i class="fa-solid fa-bolt absolute -bottom-6 -right-4 text-8xl text-white opacity-10"></i>
         </div>
 
-        <!-- Quick Access Section (Like the image) -->
+        <!-- Quick Access -->
         <div>
-            <h3 class="text-lg font-bold text-slate-800 mb-3 px-1">Quick Access</h3>
+            <h3 class="text-lg font-bold text-slate-800 mb-3 px-1">Resources</h3>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="window.openModal('pdfBankModal')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition active:scale-95">
-                    <div class="bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center">
-                        <i class="fa-regular fa-file-pdf text-2xl text-blue-500"></i>
-                    </div>
-                    <span class="font-bold text-slate-700">PDF Bank</span>
+                <button onclick="window.openModal('pdfBankModal'); renderPdfs();" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:bg-slate-50 transition active:scale-95">
+                    <div class="bg-blue-50 w-12 h-12 rounded-full flex shrink-0 items-center justify-center"><i class="fa-regular fa-file-pdf text-xl text-blue-500"></i></div>
+                    <div class="text-left"><span class="block font-bold text-slate-700 text-sm">PDF Bank</span><span class="text-[10px] text-slate-400">Books & Docs</span></div>
                 </button>
-                <button onclick="window.openModal('notesModal')" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-3 hover:bg-slate-50 transition active:scale-95">
-                    <div class="bg-purple-50 w-12 h-12 rounded-full flex items-center justify-center">
-                        <i class="fa-regular fa-bookmark text-2xl text-purple-500"></i>
-                    </div>
-                    <span class="font-bold text-slate-700">Notes</span>
+                <button onclick="window.openModal('notesModal'); renderNotes();" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:bg-slate-50 transition active:scale-95">
+                    <div class="bg-purple-50 w-12 h-12 rounded-full flex shrink-0 items-center justify-center"><i class="fa-regular fa-bookmark text-xl text-purple-500"></i></div>
+                    <div class="text-left"><span class="block font-bold text-slate-700 text-sm">Notes</span><span class="text-[10px] text-slate-400">Checklists & Text</span></div>
                 </button>
             </div>
         </div>
@@ -90,56 +85,81 @@
         <!-- Today's Classes -->
         <div>
             <div class="flex justify-between items-end mb-3 px-1">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800">Today's Schedule</h3>
-                    <p class="text-xs text-slate-500 font-medium" id="homeDateDisplay"></p>
-                </div>
-                <!-- Dropdown to filter classes -->
+                <h3 class="text-lg font-bold text-slate-800">Today's Schedule</h3>
                 <select id="homeTypeFilter" onchange="window.displayHomeClasses()" class="bg-white border border-slate-200 text-slate-600 text-xs font-bold py-1.5 px-3 rounded-lg outline-none shadow-sm">
-                    <option value="All">All Types</option>
-                    <!-- Populated dynamically -->
+                    <!-- JS Injects -->
                 </select>
             </div>
-            
-            <div id="homeClassesList" class="space-y-3">
-                <!-- Injected via JS -->
-            </div>
+            <div id="homeClassesList" class="space-y-3"></div>
         </div>
     </main>
 
     <!-- ================= PAGE 2: ALL CLASSES ================= -->
-    <main id="page-schedule" class="page-content hidden space-y-4">
-        <div class="flex justify-between items-center px-1 mb-2">
-            <h2 class="text-xl font-bold text-slate-800">All Classes</h2>
-            <span id="classCount" class="bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">0</span>
-        </div>
+    <main id="page-schedule" class="page-content hidden space-y-4 pt-2">
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-800">All Classes</h2>
+                <p class="text-xs text-slate-500"><span id="classCount">0</span> total scheduled</p>
+            </div>
+            <button onclick="window.openModal('classModal')" class="bg-brand-600 text-white font-bold py-2 px-4 rounded-xl shadow-md flex items-center gap-2 hover:bg-brand-700">
+                <i class="fa-solid fa-plus"></i> Add
+            </button>
+        </header>
         
-        <div id="allClassesList" class="space-y-4">
-            <!-- Injected via JS -->
-        </div>
+        <div id="allClassesList" class="space-y-4"></div>
         
         <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
-            <div class="bg-slate-200 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-                <i class="fa-regular fa-calendar-xmark text-2xl text-slate-500"></i>
-            </div>
+            <div class="bg-slate-200 w-16 h-16 rounded-full flex items-center justify-center mb-4"><i class="fa-regular fa-calendar-xmark text-2xl text-slate-500"></i></div>
             <h3 class="text-lg font-bold text-slate-700">No classes found</h3>
-            <p class="text-slate-500 text-sm mt-1">Tap the + button to add one.</p>
+            <p class="text-slate-500 text-sm mt-1">Tap the Add button to schedule classes.</p>
         </div>
     </main>
 
     <!-- ================= PAGE 3: ANALYSIS ================= -->
-    <main id="page-analysis" class="page-content hidden space-y-6">
-        <h2 class="text-xl font-bold text-slate-800 px-1">Analytics</h2>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center flex flex-col items-center justify-center min-h-[50vh]">
-            <i class="fa-solid fa-chart-simple text-6xl text-slate-300 mb-6"></i>
-            <h2 class="text-xl font-bold text-slate-700 mb-2">Statistics Coming Soon</h2>
-            <p class="text-slate-500 text-sm max-w-xs">Track your attendance rate and study hours here in the next update.</p>
+    <main id="page-analysis" class="page-content hidden space-y-6 pt-2">
+        <header class="flex justify-between items-center mb-2">
+            <h2 class="text-2xl font-extrabold text-slate-800">Analysis</h2>
+            <select id="analysisTypeFilter" onchange="window.renderAnalysis()" class="bg-white border border-slate-200 text-slate-600 text-sm font-bold py-2 px-3 rounded-xl outline-none shadow-sm">
+                <!-- JS Injects -->
+            </select>
+        </header>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center">
+            <h3 class="font-bold text-slate-500 text-sm tracking-wide uppercase mb-4" id="analysisTitle">Overall Attendance</h3>
+            
+            <svg viewBox="0 0 36 36" class="circular-chart w-40 h-40 mb-2">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle stroke-brand-500" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" id="attendanceCircle" />
+                <text x="18" y="20.5" class="text-3xl font-bold fill-slate-800" text-anchor="middle" id="attendanceText">0%</text>
+            </svg>
+            <p class="text-xs text-slate-400 mb-6">Based on completed vs missed classes</p>
+
+            <div class="grid grid-cols-3 w-full gap-2 text-center border-t border-slate-100 pt-4">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Attended</p>
+                    <p class="text-xl font-bold text-emerald-600" id="statAttended">0</p>
+                </div>
+                <div class="border-x border-slate-100">
+                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Bunked/Missed</p>
+                    <p class="text-xl font-bold text-red-500" id="statBunked">0</p>
+                </div>
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Valid</p>
+                    <p class="text-xl font-bold text-slate-700" id="statTotal">0</p>
+                </div>
+            </div>
         </div>
+        <p class="text-center text-xs text-slate-400"><i class="fa-solid fa-circle-info"></i> Pending classes and Holidays are not counted in percentages.</p>
     </main>
 
     <!-- ================= PAGE 4: CALENDAR ================= -->
-    <main id="page-calendar" class="page-content hidden space-y-6">
-        <h2 class="text-xl font-bold text-slate-800 px-1">Calendar</h2>
+    <main id="page-calendar" class="page-content hidden space-y-6 pt-2">
+        <header class="flex justify-between items-center mb-2">
+            <h2 class="text-2xl font-extrabold text-slate-800">Calendar</h2>
+            <button onclick="window.openModal('holidayModal')" class="bg-yellow-100 text-yellow-700 font-bold py-2 px-4 rounded-xl flex items-center gap-2 hover:bg-yellow-200">
+                <i class="fa-solid fa-plus"></i> Holiday
+            </button>
+        </header>
         
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
             <div class="flex justify-between items-center mb-4">
@@ -151,180 +171,259 @@
             <div class="grid grid-cols-7 text-center text-xs font-bold text-slate-400 mb-2">
                 <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
             </div>
-            <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center">
-                <!-- Generated by JS -->
-            </div>
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center"></div>
         </div>
 
         <div id="calendarDayDetails" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hidden">
             <h4 id="selectedDateTitle" class="font-bold text-brand-600 mb-3 border-b pb-2"></h4>
-            <div id="selectedDateContent" class="space-y-3 text-sm">
-                <!-- Details injected here -->
-            </div>
+            <div id="selectedDateContent" class="space-y-3 text-sm"></div>
         </div>
     </main>
 
     <!-- ================= PAGE 5: PROFILE ================= -->
-    <main id="page-profile" class="page-content hidden space-y-6">
-        <h2 class="text-xl font-bold text-slate-800 px-1">Profile & Data</h2>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center">
-            <div class="w-20 h-20 bg-brand-100 rounded-full flex items-center justify-center mb-4">
-                <i class="fa-solid fa-user text-3xl text-brand-600"></i>
+    <main id="page-profile" class="page-content hidden space-y-6 pt-2">
+        <header class="mb-6"><h2 class="text-2xl font-extrabold text-slate-800">Profile & Settings</h2></header>
+        
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex items-center gap-4">
+            <div class="w-16 h-16 bg-brand-100 rounded-full flex items-center justify-center"><i class="fa-solid fa-user text-2xl text-brand-600"></i></div>
+            <div>
+                <h3 class="font-bold text-lg text-slate-800">TrackerPro User</h3>
+                <p class="text-slate-500 text-xs">Local Device Storage</p>
             </div>
-            <h3 class="font-bold text-lg">Local User</h3>
-            <p class="text-slate-500 text-sm">Data saved on device</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <h3 class="font-bold text-xs uppercase text-slate-400 p-4 pb-2">Data Management</h3>
+            <div class="divide-y divide-slate-100">
+                <button onclick="exportData()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
+                    <div class="flex items-center gap-3 text-slate-700 font-medium"><i class="fa-solid fa-download w-5 text-blue-500 text-center"></i> Backup Data (Export)</div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
+                    <div class="flex items-center gap-3 text-slate-700 font-medium"><i class="fa-solid fa-upload w-5 text-emerald-500 text-center"></i> Restore Data (Import)</div>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+                </button>
+                <button onclick="clearAllData()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
+                    <div class="flex items-center gap-3 text-red-600 font-medium"><i class="fa-solid fa-trash-can w-5 text-center"></i> Clear All Data</div>
+                </button>
+            </div>
+            <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
         </div>
     </main>
 
 </div>
 
 <!-- ================= BOTTOM NAVIGATION ================= -->
-<nav class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 pb-safe">
+<nav class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
     <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
-        <button onclick="window.switchTab('home')" id="nav-home" class="nav-btn text-brand-600 flex flex-col items-center w-14 gap-1">
-            <i class="fa-solid fa-book-open text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold">Study</span>
-        </button>
-        <button onclick="window.switchTab('schedule')" id="nav-schedule" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1">
-            <i class="fa-solid fa-layer-group text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold">Classes</span>
-        </button>
-        <button onclick="window.switchTab('analysis')" id="nav-analysis" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1">
-            <i class="fa-solid fa-chart-pie text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold">Analysis</span>
-        </button>
-        <button onclick="window.switchTab('calendar')" id="nav-calendar" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1">
-            <i class="fa-regular fa-calendar text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold">Calendar</span>
-        </button>
-        <button onclick="window.switchTab('profile')" id="nav-profile" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1">
-            <i class="fa-solid fa-user text-xl mb-0.5"></i>
-            <span class="text-[10px] font-bold">Profile</span>
-        </button>
+        <button onclick="window.switchTab('home')" id="nav-home" class="nav-btn text-brand-600 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-house text-xl mb-0.5"></i><span class="text-[10px] font-bold">Home</span></button>
+        <button onclick="window.switchTab('schedule')" id="nav-schedule" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-layer-group text-xl mb-0.5"></i><span class="text-[10px] font-bold">Classes</span></button>
+        <button onclick="window.switchTab('analysis')" id="nav-analysis" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-chart-pie text-xl mb-0.5"></i><span class="text-[10px] font-bold">Analysis</span></button>
+        <button onclick="window.switchTab('calendar')" id="nav-calendar" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-regular fa-calendar text-xl mb-0.5"></i><span class="text-[10px] font-bold">Calendar</span></button>
+        <button onclick="window.switchTab('profile')" id="nav-profile" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-user text-xl mb-0.5"></i><span class="text-[10px] font-bold">Profile</span></button>
     </div>
 </nav>
-
 
 <!-- ================= MODALS ================= -->
 
 <!-- ADD CLASS MODAL -->
 <div id="classModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-xl font-bold text-slate-800">Add New Class</h2>
-            <button onclick="window.closeModal('classModal')" class="bg-slate-100 text-slate-500 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+            <h2 class="text-xl font-bold text-slate-800">Add Class</h2>
+            <button onclick="window.closeModal('classModal')" class="bg-white text-slate-500 w-8 h-8 rounded-full border shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="p-6 overflow-y-auto no-scrollbar">
             <form id="trackerForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Course Name</label>
-                    <input type="text" id="courseName" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 outline-none">
+                    <input type="text" id="courseName" required class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl focus:border-brand-500 focus:ring-2 focus:ring-brand-100 outline-none transition">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Date</label>
-                        <input type="date" id="dateInput" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 outline-none text-sm">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Start Date</label>
+                        <input type="date" id="dateInput" required class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none text-sm font-medium">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Time</label>
-                        <input type="time" id="time" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 outline-none text-sm">
+                        <input type="time" id="time" class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none text-sm font-medium">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Class Type</label>
                     <div class="flex gap-2">
-                        <select id="type" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-500 outline-none">
-                            <!-- JS Populates -->
-                        </select>
-                        <button type="button" onclick="window.addNewType()" class="bg-brand-50 text-brand-600 px-4 rounded-xl font-bold"><i class="fa-solid fa-plus"></i></button>
+                        <select id="type" required class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none"></select>
+                        <button type="button" onclick="window.addNewType()" class="bg-brand-50 border border-brand-200 text-brand-600 px-4 rounded-xl font-bold"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-brand-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md mt-4">Save Class</button>
+                
+                <!-- Repeat Feature -->
+                <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
+                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-slate-700 mb-3">
+                        <input type="checkbox" id="isRepeat" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" onchange="document.getElementById('repeatDays').classList.toggle('hidden', !this.checked)"> 
+                        Repeat Weekly (Next 8 Weeks)
+                    </label>
+                    <div id="repeatDays" class="hidden flex justify-between gap-1">
+                        <!-- Days map: 0=Sun, 1=Mon, etc. -->
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="1" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">M</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="2" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">T</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="3" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">W</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="4" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">T</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="5" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">F</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="6" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">S</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="0" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">S</div></label>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md mt-2 transition">Save Class</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- PDF BANK MODAL -->
+<!-- PDF BANK MODAL (Folders) -->
 <div id="pdfBankModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-blue-50">
-            <div class="flex items-center gap-2 text-blue-700 font-bold text-lg">
-                <i class="fa-regular fa-file-pdf"></i> PDF Bank
+            <div class="flex items-center gap-2 text-blue-700 font-bold text-lg"><i class="fa-regular fa-file-pdf"></i> PDF Bank</div>
+            <div class="flex gap-2">
+                <button onclick="window.openModal('addPdfModal')" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="window.closeModal('pdfBankModal')" class="bg-white/50 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <button onclick="window.closeModal('pdfBankModal')" class="bg-white/50 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
+        <!-- Folder Tabs -->
+        <div class="bg-white border-b border-slate-100 px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar" id="pdfFoldersList">
+            <!-- JS Injects -->
+        </div>
+
         <div class="p-4 flex-1 overflow-y-auto bg-slate-50">
             <div id="pdfList" class="space-y-3"></div>
-            
-            <!-- Add PDF Form within Modal -->
-            <div class="mt-6 bg-white p-4 rounded-2xl border border-slate-200">
-                <h4 class="font-bold text-sm text-slate-700 mb-3"><i class="fa-solid fa-link"></i> Add PDF/Book Link</h4>
-                <div class="space-y-3">
-                    <input type="text" id="pdfTitle" placeholder="Document Title (e.g. History NCERT)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
-                    <input type="url" id="pdfUrl" placeholder="Google Drive / Web URL" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none">
-                    <button onclick="addPdf()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-sm">Save to Bank</button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- NOTES MODAL -->
+<!-- ADD PDF FORM MODAL -->
+<div id="addPdfModal" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <h3 class="font-bold text-lg mb-4">Add Document</h3>
+        <input type="text" id="pdfTitle" placeholder="Title (e.g. History NCERT)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg mb-3 outline-none">
+        <input type="url" id="pdfUrl" placeholder="Link (Drive, Web)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg mb-3 outline-none">
+        
+        <div class="flex gap-2 mb-4">
+            <select id="pdfFolderSelect" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm"></select>
+            <button onclick="addFolder('pdf')" class="bg-slate-100 px-4 rounded-lg font-bold text-slate-600"><i class="fa-solid fa-folder-plus"></i></button>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="window.closeModal('addPdfModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-lg">Cancel</button>
+            <button onclick="addPdf()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- NOTES MODAL (Folders) -->
 <div id="notesModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-purple-50">
-            <div class="flex items-center gap-2 text-purple-700 font-bold text-lg">
-                <i class="fa-regular fa-bookmark"></i> Notes
+            <div class="flex items-center gap-2 text-purple-700 font-bold text-lg"><i class="fa-regular fa-bookmark"></i> Notes</div>
+            <div class="flex gap-2">
+                <button onclick="window.openModal('addNoteModal')" class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="window.closeModal('notesModal')" class="bg-white/50 text-purple-700 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <button onclick="window.closeModal('notesModal')" class="bg-white/50 text-purple-700 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
+
+        <!-- Folder Tabs -->
+        <div class="bg-white border-b border-slate-100 px-4 py-3 flex gap-2 overflow-x-auto no-scrollbar" id="noteFoldersList"></div>
+
+        <div class="p-4 flex-1 overflow-y-auto bg-slate-50">
+            <div id="notesList" class="space-y-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD NOTE FORM MODAL -->
+<div id="addNoteModal" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <h3 class="font-bold text-lg mb-4">Create Note</h3>
+        <input type="text" id="noteTitle" placeholder="Note Title" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-t-lg outline-none font-bold">
+        <textarea id="noteContent" rows="4" placeholder="Write contents or checklists..." class="w-full px-4 py-3 bg-slate-50 border-x border-b border-slate-200 rounded-b-lg mb-3 outline-none resize-none"></textarea>
         
-        <div class="p-4 flex-1 overflow-y-auto bg-slate-50 flex flex-col">
-            <div id="notesList" class="space-y-3 mb-6 flex-1"></div>
-            
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <h4 class="font-bold text-sm text-slate-700 mb-2">Create Note</h4>
-                <input type="text" id="noteTitle" placeholder="Title" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-t-lg text-sm outline-none font-bold">
-                <textarea id="noteContent" rows="3" placeholder="Write anything or make checklists..." class="w-full px-3 py-2 bg-slate-50 border-x border-b border-slate-200 rounded-b-lg text-sm outline-none resize-none"></textarea>
-                <button onclick="addNote()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-lg text-sm mt-3">Save Note</button>
-            </div>
+        <div class="flex gap-2 mb-4">
+            <select id="noteFolderSelect" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm"></select>
+            <button onclick="addFolder('note')" class="bg-slate-100 px-4 rounded-lg font-bold text-slate-600"><i class="fa-solid fa-folder-plus"></i></button>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="window.closeModal('addNoteModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-lg">Cancel</button>
+            <button onclick="addNote()" class="flex-1 bg-purple-600 text-white font-bold py-3 rounded-lg">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- ADD HOLIDAY MODAL -->
+<div id="holidayModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+        <h3 class="font-bold text-lg mb-4 text-slate-800">Add Global Holiday</h3>
+        <p class="text-xs text-slate-500 mb-4">Adding a holiday will automatically cancel all college classes scheduled on this day.</p>
+        <input type="text" id="holTitle" placeholder="Holiday Name (e.g. Diwali)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg mb-3 outline-none">
+        <input type="date" id="holDate" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg mb-4 outline-none">
+        
+        <div class="flex gap-2">
+            <button onclick="window.closeModal('holidayModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-lg">Cancel</button>
+            <button onclick="addGlobalHoliday()" class="flex-1 bg-yellow-500 text-white font-bold py-3 rounded-lg">Save Holiday</button>
         </div>
     </div>
 </div>
 
 <script>
     // --- STATE MANAGEMENT ---
-    let classes = JSON.parse(localStorage.getItem('pw_classes')) || [];
-    let pdfs = JSON.parse(localStorage.getItem('pw_pdfs')) || [];
-    let notes = JSON.parse(localStorage.getItem('pw_notes')) || [];
-    let customTypes = JSON.parse(localStorage.getItem('pw_types')) || ['College', 'Batch', 'Other'];
+    let classes = JSON.parse(localStorage.getItem('pw_classes_v2')) || [];
+    let pdfs = JSON.parse(localStorage.getItem('pw_pdfs_v2')) || [];
+    let notes = JSON.parse(localStorage.getItem('pw_notes_v2')) || [];
+    let customTypes = JSON.parse(localStorage.getItem('pw_types_v2')) || ['College', 'Batch', 'Other'];
+    let folders = JSON.parse(localStorage.getItem('pw_folders_v2')) || { pdf: ['General'], note: ['General'] };
+    let holidays = JSON.parse(localStorage.getItem('pw_holidays_v2')) || [];
     
-    // Calendar state
+    // UI State
+    let activePdfFolder = 'General';
+    let activeNoteFolder = 'General';
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
 
-    // Date Strings
+    // Init Date Strings
     const todayObj = new Date();
     const offset = todayObj.getTimezoneOffset();
     const todayLocal = new Date(todayObj.getTime() - (offset*60*1000));
     const currentDateString = todayLocal.toISOString().split('T')[0];
 
     document.getElementById('homeDateDisplay').innerText = todayObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    document.getElementById('dateInput').value = currentDateString;
+    document.getElementById('holDate').value = currentDateString;
+
+    // Motivational Quotes
+    const quotes = [
+        "Push yourself, because no one else is going to do it for you.",
+        "Sometimes later becomes never. Do it now.",
+        "Great things never come from comfort zones.",
+        "Success doesn't just find you. You have to go out and get it.",
+        "The harder you work for something, the greater you'll feel."
+    ];
+    document.getElementById('dailyQuote').innerText = `"${quotes[todayObj.getDay() % quotes.length]}"`;
 
     // --- NAVIGATION ---
     window.switchTab = function(tabId) {
         document.querySelectorAll('.page-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('block'); });
         document.getElementById(`page-${tabId}`).classList.remove('hidden');
         document.getElementById(`page-${tabId}`).classList.add('block');
-
+        
         document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-brand-600'); b.classList.add('text-slate-400'); });
         document.getElementById(`nav-${tabId}`).classList.remove('text-slate-400');
         document.getElementById(`nav-${tabId}`).classList.add('text-brand-600');
         window.scrollTo(0, 0);
 
         if(tabId === 'calendar') renderCalendar();
+        if(tabId === 'analysis') renderAnalysis();
     }
 
     // --- MODALS ---
@@ -333,7 +432,6 @@
         m.classList.remove('hidden');
         m.firstElementChild.classList.remove('modal-exit');
         m.firstElementChild.classList.add('modal-enter');
-        if(id === 'classModal') document.getElementById('dateInput').value = currentDateString;
     }
     window.closeModal = function(id) {
         const m = document.getElementById(id);
@@ -342,87 +440,129 @@
         setTimeout(() => m.classList.add('hidden'), 200);
     }
 
-    // --- CLASS TYPES ---
-    function renderTypeDropdowns() {
-        const html = customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-        document.getElementById('type').innerHTML = html;
-        document.getElementById('homeTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
+    // --- SHARED UTILS ---
+    function isCollegeType(type) {
+        const t = type.toLowerCase();
+        return t.includes('college') || t.includes('bsc') || t.includes('bed') || t.includes('university');
     }
-
-    window.addNewType = function() {
-        const newType = prompt("Enter a new class type (e.g. BSc BEd, Tuitions):");
-        if (newType && newType.trim().length > 0 && !customTypes.includes(newType.trim())) {
-            customTypes.push(newType.trim());
-            localStorage.setItem('pw_types', JSON.stringify(customTypes));
-            renderTypeDropdowns();
-            document.getElementById('type').value = newType.trim();
-        }
-    }
-
-    // --- RENDER CLASSES ---
-    function formatTime(timeStr) {
-        if (!timeStr) return '';
-        const [h, m] = timeStr.split(':');
+    function formatTime(tStr) {
+        if (!tStr) return '';
+        const [h, m] = tStr.split(':');
         let hr = parseInt(h);
         const ampm = hr >= 12 ? 'PM' : 'AM';
         hr = hr % 12 || 12;
         return `${hr}:${m} ${ampm}`;
     }
 
+    // --- CLASS TYPES ---
+    function renderTypeDropdowns() {
+        const html = customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        document.getElementById('type').innerHTML = html;
+        document.getElementById('homeTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
+        document.getElementById('analysisTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
+    }
+
+    window.addNewType = function() {
+        const newType = prompt("New Class Type (e.g. BSc, Tuition):");
+        if (newType && newType.trim() && !customTypes.includes(newType.trim())) {
+            customTypes.push(newType.trim());
+            renderTypeDropdowns();
+            document.getElementById('type').value = newType.trim();
+            saveAllData();
+        }
+    }
+
+    // --- CLASS GENERATION & RENDERING ---
+    document.getElementById('trackerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const baseName = document.getElementById('courseName').value.trim();
+        const startDateStr = document.getElementById('dateInput').value;
+        const timeStr = document.getElementById('time').value;
+        const typeStr = document.getElementById('type').value;
+        
+        const isRepeat = document.getElementById('isRepeat').checked;
+        const selectedDays = Array.from(document.querySelectorAll('#repeatDays input:checked')).map(cb => parseInt(cb.value));
+
+        const isColl = isCollegeType(typeStr);
+
+        if (!isRepeat || selectedDays.length === 0) {
+            // Single Class
+            let stat = 'Pending';
+            if (isColl && holidays.some(h => h.date === startDateStr)) stat = 'Holiday';
+            
+            classes.push({ id: Date.now().toString(), name: baseName, date: startDateStr, time: timeStr, type: typeStr, status: stat });
+        } else {
+            // Repeating Classes (Next 8 Weeks = 56 days)
+            const startD = new Date(startDateStr);
+            for(let i=0; i<56; i++) {
+                let loopD = new Date(startD);
+                loopD.setDate(loopD.getDate() + i);
+                
+                if (selectedDays.includes(loopD.getDay())) {
+                    const localLoopDateStr = loopD.toISOString().split('T')[0];
+                    let stat = 'Pending';
+                    // Auto-mark global holidays for college classes
+                    if (isColl && holidays.some(h => h.date === localLoopDateStr)) stat = 'Holiday';
+                    
+                    classes.push({ id: Date.now().toString() + i, name: baseName, date: localLoopDateStr, time: timeStr, type: typeStr, status: stat });
+                }
+            }
+        }
+        
+        saveAllData();
+        document.getElementById('trackerForm').reset();
+        document.getElementById('repeatDays').classList.add('hidden');
+        window.closeModal('classModal');
+    });
+
     function renderClassCard(cls) {
-        const timeStr = formatTime(cls.time);
-        const isCollege = cls.type.toLowerCase().includes('college') || cls.type.toLowerCase().includes('bsc') || cls.type.toLowerCase().includes('bed');
+        const tStr = formatTime(cls.time);
+        const isColl = isCollegeType(cls.type);
         
         let actionArea = '';
 
-        if (isCollege) {
-            // College specific UI (Attend, Bunk, Holiday)
-            const getBtnCls = (statusCheck) => cls.status === statusCheck 
-                ? `bg-brand-600 text-white border-brand-600` 
-                : `bg-white text-slate-500 border-slate-200 hover:bg-slate-50`;
-            
+        if (isColl) {
+            const getBtnCls = (check) => cls.status === check ? `bg-brand-600 text-white border-brand-600` : `bg-white text-slate-500 border-slate-200 hover:bg-slate-50`;
             actionArea = `
                 <div class="mt-3 flex gap-2">
-                    <button onclick="updateStatus('${cls.id}', 'Attended')" class="flex-1 text-xs font-bold py-1.5 rounded-md border transition ${getBtnCls('Attended')}">Attend</button>
-                    <button onclick="updateStatus('${cls.id}', 'Bunked')" class="flex-1 text-xs font-bold py-1.5 rounded-md border transition ${getBtnCls('Bunked')}">Bunk</button>
-                    <button onclick="updateStatus('${cls.id}', 'Holiday')" class="flex-1 text-xs font-bold py-1.5 rounded-md border transition ${getBtnCls('Holiday')}">Holiday</button>
+                    <button onclick="updateStatus('${cls.id}', 'Attended')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Attended')}">Attend</button>
+                    <button onclick="updateStatus('${cls.id}', 'Bunked')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Bunked')}">Bunk</button>
+                    <button onclick="updateStatus('${cls.id}', 'Holiday')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Holiday')}">Holiday</button>
                 </div>
             `;
         } else {
-            // Standard UI (Checkbox Done)
             const isDone = cls.status === 'Done';
             actionArea = `
                 <div class="mt-3 flex justify-between items-center border-t border-slate-100 pt-3">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <div class="relative flex items-center justify-center w-5 h-5 rounded border border-slate-300 bg-white">
-                            <input type="checkbox" class="peer sr-only" ${isDone ? 'checked' : ''} onchange="updateStatus('${cls.id}', this.checked ? 'Done' : 'Pending')">
+                            <input type="checkbox" class="peer sr-only done-check" ${isDone ? 'checked' : ''} onchange="updateStatus('${cls.id}', this.checked ? 'Done' : 'Pending')">
                             <div class="absolute inset-0 rounded flex items-center justify-center check-anim">
-                                <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                <svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                         </div>
-                        <span class="text-sm font-bold ${isDone ? 'text-emerald-600 line-through opacity-70' : 'text-slate-600'}">Class Done</span>
+                        <span class="text-sm font-bold ${isDone ? 'text-emerald-600 line-through opacity-70' : 'text-slate-600'}">Mark Done</span>
                     </label>
-                    <button onclick="deleteClass('${cls.id}')" class="text-slate-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="deleteClass('${cls.id}')" class="text-slate-300 hover:text-red-500 bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button>
                 </div>
             `;
         }
 
-        // College specific card style
-        const cardStyle = isCollege ? 'border-l-4 border-l-brand-500' : 'border border-slate-200';
+        const cardStyle = isColl ? 'border-l-4 border-l-brand-500' : 'border border-slate-200';
 
         return `
-            <div class="bg-white p-4 rounded-xl shadow-sm ${cardStyle} relative">
-                ${isCollege && cls.status === 'Holiday' ? `<div class="absolute top-2 right-2 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Holiday</div>` : ''}
-                ${isCollege && cls.status === 'Bunked' ? `<div class="absolute top-2 right-2 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Bunked</div>` : ''}
+            <div class="bg-white p-4 rounded-2xl shadow-sm ${cardStyle} relative">
+                ${isColl && cls.status === 'Holiday' ? `<div class="absolute top-3 right-3 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Holiday</div>` : ''}
+                ${isColl && cls.status === 'Bunked' ? `<div class="absolute top-3 right-3 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Bunked</div>` : ''}
                 
                 <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">${cls.type}</span>
-                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock"></i> ${timeStr || 'No time'}</span>
+                    <span class="text-[10px] font-bold text-brand-700 bg-brand-100 px-2 py-1 rounded-md uppercase tracking-wider">${cls.type}</span>
+                    <span class="text-xs font-medium text-slate-400"><i class="fa-regular fa-clock"></i> ${tStr || 'Anytime'}</span>
                 </div>
-                <h4 class="font-bold text-slate-800 text-lg">${cls.name}</h4>
-                <p class="text-xs text-slate-500">${cls.date}</p>
+                <h4 class="font-bold text-slate-800 text-lg w-[80%]">${cls.name}</h4>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">${cls.date}</p>
                 ${actionArea}
-                ${isCollege ? `<button onclick="deleteClass('${cls.id}')" class="absolute top-2 right-2 text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                ${isColl ? `<button onclick="deleteClass('${cls.id}')" class="absolute bottom-3 right-3 text-slate-300 hover:text-red-500 bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button>` : ''}
             </div>
         `;
     }
@@ -433,81 +573,82 @@
         
         let todays = classes.filter(c => c.date === currentDateString);
         if (filter !== 'All') todays = todays.filter(c => c.type === filter);
-        
         todays.sort((a,b) => (a.time||"24:00").localeCompare(b.time||"24:00"));
 
-        if (todays.length === 0) {
-            list.innerHTML = `<div class="text-center p-6 bg-slate-50 rounded-xl border border-dashed border-slate-300"><p class="text-slate-500 text-sm">No classes match this filter for today.</p></div>`;
-        } else {
-            list.innerHTML = todays.map(renderClassCard).join('');
-        }
+        list.innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-medium text-sm">No classes match this filter today.</p></div>`;
     }
 
     function displayAllClasses() {
         const list = document.getElementById('allClassesList');
-        const count = document.getElementById('classCount');
-        const empty = document.getElementById('emptyState');
+        document.getElementById('classCount').innerText = classes.length;
         
-        count.innerText = classes.length;
         if(classes.length === 0) {
-            empty.classList.remove('hidden'); empty.classList.add('flex');
-            list.innerHTML = '';
-            return;
+            document.getElementById('emptyState').classList.remove('hidden'); document.getElementById('emptyState').classList.add('flex');
+            list.innerHTML = ''; return;
         }
-        empty.classList.add('hidden'); empty.classList.remove('flex');
+        document.getElementById('emptyState').classList.add('hidden'); document.getElementById('emptyState').classList.remove('flex');
 
         const sorted = [...classes].sort((a,b) => new Date(b.date) - new Date(a.date));
         list.innerHTML = sorted.map(renderClassCard).join('');
     }
 
-    // --- CRUD CLASSES ---
-    document.getElementById('trackerForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const newClass = {
-            id: Date.now().toString(),
-            name: document.getElementById('courseName').value.trim(),
-            date: document.getElementById('dateInput').value,
-            time: document.getElementById('time').value,
-            type: document.getElementById('type').value,
-            status: 'Pending'
-        };
-        classes.push(newClass);
-        saveData();
-        window.closeModal('classModal');
-    });
-
-    window.updateStatus = function(id, newStatus) {
-        const cls = classes.find(c => c.id === id);
-        if(cls) {
-            cls.status = newStatus;
-            saveData();
-        }
+    window.updateStatus = function(id, st) {
+        const c = classes.find(x => x.id === id);
+        if(c) { c.status = st; saveAllData(); }
     }
-
     window.deleteClass = function(id) {
-        if(confirm("Delete this class?")) {
-            classes = classes.filter(c => c.id !== id);
-            saveData();
+        if(confirm("Delete this class?")) { classes = classes.filter(x => x.id !== id); saveAllData(); }
+    }
+
+    // --- FOLDERS & DATA (PDFs & NOTES) ---
+    function renderFolderTabs(type) {
+        const listId = type === 'pdf' ? 'pdfFoldersList' : 'noteFoldersList';
+        const activeF = type === 'pdf' ? activePdfFolder : activeNoteFolder;
+        const dataArr = folders[type];
+        
+        const html = dataArr.map(f => `
+            <button onclick="setActiveFolder('${type}', '${f}')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition ${f === activeF ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">${f}</button>
+        `).join('');
+        
+        document.getElementById(listId).innerHTML = html;
+        
+        // Update Select dropdowns in add modals
+        const selectId = type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect';
+        document.getElementById(selectId).innerHTML = dataArr.map(f => `<option value="${f}">${f}</option>`).join('');
+    }
+
+    window.setActiveFolder = function(type, f) {
+        if(type === 'pdf') { activePdfFolder = f; renderPdfs(); }
+        else { activeNoteFolder = f; renderNotes(); }
+        renderFolderTabs(type);
+    }
+
+    window.addFolder = function(type) {
+        const n = prompt("New Folder Name:");
+        if(n && n.trim() && !folders[type].includes(n.trim())) {
+            folders[type].push(n.trim());
+            saveAllData();
+            renderFolderTabs(type);
+            document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').value = n.trim();
         }
     }
 
-    // --- PDF BANK ---
-    function renderPdfs() {
+    window.renderPdfs = function() {
         const list = document.getElementById('pdfList');
-        if(pdfs.length === 0) {
-            list.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No PDFs added yet.</p>';
-            return;
-        }
-        list.innerHTML = pdfs.map((p, i) => `
-            <div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
+        const filtered = pdfs.filter(p => p.folder === activePdfFolder);
+        
+        if(filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
+        
+        list.innerHTML = filtered.map(p => `
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="bg-red-50 text-red-500 p-2 rounded-lg"><i class="fa-regular fa-file-pdf"></i></div>
+                    <div class="bg-blue-50 text-blue-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0"><i class="fa-regular fa-file-pdf"></i></div>
                     <div class="truncate">
                         <h5 class="font-bold text-sm text-slate-800 truncate">${p.title}</h5>
-                        <a href="${p.url}" target="_blank" class="text-[10px] text-blue-500 hover:underline">Open Link <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                        <a href="${p.url}" target="_blank" class="text-[10px] font-bold text-blue-500 hover:underline uppercase tracking-wide">Open Link <i class="fa-solid fa-arrow-up-right-from-square ml-0.5"></i></a>
                     </div>
                 </div>
-                <button onclick="deletePdf(${i})" class="text-slate-300 hover:text-red-500 px-2"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                <button onclick="deletePdf('${p.id}')" class="text-slate-300 hover:text-red-500 px-2 shrink-0"><i class="fa-solid fa-trash-can text-sm"></i></button>
             </div>
         `).join('');
     }
@@ -515,34 +656,29 @@
     window.addPdf = function() {
         const title = document.getElementById('pdfTitle').value.trim();
         const url = document.getElementById('pdfUrl').value.trim();
+        const fld = document.getElementById('pdfFolderSelect').value;
         if(title && url) {
-            pdfs.push({ title, url });
-            localStorage.setItem('pw_pdfs', JSON.stringify(pdfs));
-            renderPdfs();
-            document.getElementById('pdfTitle').value = '';
-            document.getElementById('pdfUrl').value = '';
+            pdfs.push({ id: Date.now().toString(), title, url, folder: fld });
+            saveAllData();
+            document.getElementById('pdfTitle').value = ''; document.getElementById('pdfUrl').value = '';
+            window.closeModal('addPdfModal');
+            setActiveFolder('pdf', fld);
         }
     }
+    window.deletePdf = function(id) { pdfs = pdfs.filter(p => p.id !== id); saveAllData(); renderPdfs(); }
 
-    window.deletePdf = function(index) {
-        pdfs.splice(index, 1);
-        localStorage.setItem('pw_pdfs', JSON.stringify(pdfs));
-        renderPdfs();
-    }
-
-    // --- NOTES ---
-    function renderNotes() {
+    window.renderNotes = function() {
         const list = document.getElementById('notesList');
-        if(notes.length === 0) {
-            list.innerHTML = '<p class="text-center text-slate-400 text-sm py-4">No notes created yet.</p>';
-            return;
-        }
-        list.innerHTML = notes.map((n, i) => `
-            <div class="bg-yellow-50 p-3 rounded-xl border border-yellow-200 shadow-sm relative pr-8">
-                <h5 class="font-bold text-sm text-slate-800 mb-1">${n.title}</h5>
-                <p class="text-xs text-slate-600 whitespace-pre-wrap">${n.content}</p>
-                <span class="text-[9px] text-slate-400 block mt-2">${n.date}</span>
-                <button onclick="deleteNote(${i})" class="absolute top-2 right-2 text-yellow-600/50 hover:text-red-500 p-1"><i class="fa-solid fa-trash-can text-sm"></i></button>
+        const filtered = notes.filter(n => n.folder === activeNoteFolder);
+        
+        if(filtered.length === 0) { list.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
+        
+        list.innerHTML = filtered.map(n => `
+            <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 shadow-sm relative pr-8">
+                <h5 class="font-bold text-sm text-purple-900 mb-1">${n.title}</h5>
+                <p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">${n.content}</p>
+                <span class="text-[9px] font-bold text-purple-400/80 uppercase tracking-widest block mt-3">${n.date}</span>
+                <button onclick="deleteNote('${n.id}')" class="absolute top-3 right-3 text-purple-300 hover:text-red-500 w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button>
             </div>
         `).join('');
     }
@@ -550,22 +686,33 @@
     window.addNote = function() {
         const title = document.getElementById('noteTitle').value.trim();
         const content = document.getElementById('noteContent').value.trim();
+        const fld = document.getElementById('noteFolderSelect').value;
         if(title || content) {
-            notes.push({ title: title || 'Untitled', content, date: currentDateString });
-            localStorage.setItem('pw_notes', JSON.stringify(notes));
-            renderNotes();
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteContent').value = '';
+            notes.push({ id: Date.now().toString(), title: title || 'Untitled', content, date: currentDateString, folder: fld });
+            saveAllData();
+            document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = '';
+            window.closeModal('addNoteModal');
+            setActiveFolder('note', fld);
+        }
+    }
+    window.deleteNote = function(id) { notes = notes.filter(n => n.id !== id); saveAllData(); renderNotes(); }
+
+    // --- HOLIDAYS & CALENDAR ---
+    window.addGlobalHoliday = function() {
+        const title = document.getElementById('holTitle').value.trim();
+        const date = document.getElementById('holDate').value;
+        
+        if(title && date) {
+            holidays.push({ date, title });
+            // Auto mark all college classes on this day as Holiday
+            classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; });
+            
+            saveAllData();
+            document.getElementById('holTitle').value = '';
+            window.closeModal('holidayModal');
         }
     }
 
-    window.deleteNote = function(index) {
-        notes.splice(index, 1);
-        localStorage.setItem('pw_notes', JSON.stringify(notes));
-        renderNotes();
-    }
-
-    // --- CALENDAR ---
     window.changeMonth = function(dir) {
         currentMonth += dir;
         if(currentMonth > 11) { currentMonth = 0; currentYear++; }
@@ -573,37 +720,29 @@
         renderCalendar();
     }
 
-    function renderCalendar() {
+    window.renderCalendar = function() {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         document.getElementById('calendarMonthYear').innerText = `${monthNames[currentMonth]} ${currentYear}`;
         
         const firstDay = new Date(currentYear, currentMonth, 1).getDay();
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
         let gridHtml = '';
-        
-        // Blank cells
-        for(let i = 0; i < firstDay; i++) {
-            gridHtml += `<div class="p-2"></div>`;
-        }
+        for(let i = 0; i < firstDay; i++) gridHtml += `<div></div>`;
 
-        // Days
         for(let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             
-            // Check for events
             const dayClasses = classes.filter(c => c.date === dateStr);
-            const isHoliday = dayClasses.some(c => c.status === 'Holiday');
+            const dayHols = holidays.filter(h => h.date === dateStr);
             const dayNotes = notes.filter(n => n.date === dateStr);
             
             let indicators = '';
-            if(isHoliday) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>`;
+            if(dayHols.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>`;
             else if(dayClasses.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-brand-500"></div>`;
-            
             if(dayNotes.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>`;
 
             const isToday = dateStr === currentDateString;
-            const bgClass = isToday ? 'bg-brand-600 text-white shadow-md' : 'bg-slate-50 text-slate-700 hover:bg-slate-100';
+            const bgClass = isToday ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-100';
 
             gridHtml += `
                 <div onclick="selectCalendarDate('${dateStr}')" class="p-2 rounded-xl cursor-pointer flex flex-col items-center justify-center min-h-[44px] ${bgClass} transition">
@@ -613,71 +752,155 @@
             `;
         }
         document.getElementById('calendarGrid').innerHTML = gridHtml;
-        
-        // Hide details when changing month
         document.getElementById('calendarDayDetails').classList.add('hidden');
     }
 
     window.selectCalendarDate = function(dateStr) {
         const detailsBox = document.getElementById('calendarDayDetails');
-        const title = document.getElementById('selectedDateTitle');
-        const content = document.getElementById('selectedDateContent');
-        
         const dObj = new Date(dateStr);
-        title.innerText = dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        document.getElementById('selectedDateTitle').innerText = dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
         
         const dayClasses = classes.filter(c => c.date === dateStr);
+        const dayHols = holidays.filter(h => h.date === dateStr);
         const dayNotes = notes.filter(n => n.date === dateStr);
         
         let html = '';
-        
-        if(dayClasses.length === 0 && dayNotes.length === 0) {
-            html = '<p class="text-slate-400 italic">No classes or notes for this day.</p>';
+        if(dayHols.length > 0) {
+            dayHols.forEach(h => {
+                html += `<div class="bg-yellow-50 text-yellow-800 p-2 rounded-lg border border-yellow-200 text-xs font-bold uppercase tracking-wide mb-2"><i class="fa-solid fa-star text-yellow-500 mr-1"></i> Holiday: ${h.title}</div>`;
+            });
+        }
+
+        if(dayClasses.length === 0 && dayNotes.length === 0 && dayHols.length === 0) {
+            html = '<p class="text-slate-400 italic">Nothing scheduled.</p>';
         } else {
             if(dayClasses.length > 0) {
-                html += '<h5 class="font-bold text-xs text-slate-500 uppercase">Classes</h5>';
+                html += '<h5 class="font-bold text-[10px] text-slate-400 uppercase tracking-widest mt-2 mb-1">Classes</h5>';
                 dayClasses.forEach(c => {
-                    let badge = '';
-                    if(c.status === 'Holiday') badge = '<span class="bg-yellow-100 text-yellow-700 px-1.5 rounded text-[10px] ml-2">Holiday</span>';
-                    else if(c.status === 'Bunked') badge = '<span class="bg-red-100 text-red-700 px-1.5 rounded text-[10px] ml-2">Bunked</span>';
-                    else if(c.status === 'Done' || c.status === 'Attended') badge = '<span class="bg-emerald-100 text-emerald-700 px-1.5 rounded text-[10px] ml-2">Done</span>';
+                    let b = '';
+                    if(c.status === 'Holiday') b = '<span class="bg-yellow-100 text-yellow-700 px-1.5 rounded text-[10px] ml-2 uppercase">Holiday</span>';
+                    else if(c.status === 'Bunked') b = '<span class="bg-red-100 text-red-700 px-1.5 rounded text-[10px] ml-2 uppercase">Bunked</span>';
+                    else if(c.status === 'Done' || c.status === 'Attended') b = '<span class="bg-emerald-100 text-emerald-700 px-1.5 rounded text-[10px] ml-2 uppercase">Done</span>';
                     
-                    html += `<div class="bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-center">
-                        <div class="w-1.5 h-full bg-brand-500 rounded-full mr-2"></div>
+                    html += `<div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center mb-1">
+                        <div class="w-1.5 h-full min-h-[20px] bg-brand-500 rounded-full mr-2.5"></div>
                         <div class="flex-1">
-                            <div class="font-bold text-slate-800 flex items-center">${c.name} ${badge}</div>
-                            <div class="text-[10px] text-slate-500">${c.type} • ${formatTime(c.time)}</div>
+                            <div class="font-bold text-slate-800 flex items-center text-sm">${c.name} ${b}</div>
+                            <div class="text-[10px] text-slate-500 font-medium">${c.type} • ${formatTime(c.time)}</div>
                         </div>
                     </div>`;
                 });
             }
             if(dayNotes.length > 0) {
-                html += '<h5 class="font-bold text-xs text-slate-500 uppercase mt-3">Notes</h5>';
+                html += '<h5 class="font-bold text-[10px] text-slate-400 uppercase tracking-widest mt-3 mb-1">Notes</h5>';
                 dayNotes.forEach(n => {
-                    html += `<div class="bg-purple-50 p-2 rounded-lg border border-purple-100 text-purple-900 font-medium text-xs">
+                    html += `<div class="bg-purple-50 p-2.5 rounded-xl border border-purple-100 text-purple-900 font-medium text-xs mb-1">
                         <i class="fa-regular fa-bookmark opacity-50 mr-1"></i> ${n.title}
                     </div>`;
                 });
             }
         }
-        
-        content.innerHTML = html;
+        document.getElementById('selectedDateContent').innerHTML = html;
         detailsBox.classList.remove('hidden');
     }
 
-    // --- CORE SAVE ---
-    function saveData() {
-        localStorage.setItem('pw_classes', JSON.stringify(classes));
+    // --- ANALYSIS ---
+    window.renderAnalysis = function() {
+        const filter = document.getElementById('analysisTypeFilter').value;
+        let set = filter === 'All' ? classes : classes.filter(c => c.type === filter);
+        
+        // Remove pending & holidays from calculations
+        let valid = set.filter(c => c.status !== 'Pending' && c.status !== 'Holiday');
+        
+        let att = valid.filter(c => c.status === 'Attended' || c.status === 'Done').length;
+        let bnked = valid.filter(c => c.status === 'Bunked').length;
+        let total = att + bnked;
+        
+        let pct = total > 0 ? Math.round((att / total) * 100) : 0;
+
+        document.getElementById('statAttended').innerText = att;
+        document.getElementById('statBunked').innerText = bnked;
+        document.getElementById('statTotal').innerText = total;
+        
+        // Circle animation logic
+        document.getElementById('attendanceText').innerText = pct + '%';
+        // circumference is 100 in the dasharray setting
+        document.getElementById('attendanceCircle').setAttribute('stroke-dasharray', `${pct}, 100`);
+        
+        // Dynamic color for circle
+        const circle = document.getElementById('attendanceCircle');
+        circle.classList.remove('stroke-brand-500', 'stroke-emerald-500', 'stroke-red-500', 'stroke-yellow-500');
+        if(pct >= 75) circle.classList.add('stroke-emerald-500');
+        else if (pct >= 50) circle.classList.add('stroke-yellow-500');
+        else if (total > 0) circle.classList.add('stroke-red-500');
+        else circle.classList.add('stroke-brand-500');
+
+        document.getElementById('analysisTitle').innerText = filter === 'All' ? 'Overall Attendance' : `${filter} Attendance`;
+    }
+
+    // --- DATA EXPORT/IMPORT ---
+    function saveAllData() {
+        localStorage.setItem('pw_classes_v2', JSON.stringify(classes));
+        localStorage.setItem('pw_pdfs_v2', JSON.stringify(pdfs));
+        localStorage.setItem('pw_notes_v2', JSON.stringify(notes));
+        localStorage.setItem('pw_types_v2', JSON.stringify(customTypes));
+        localStorage.setItem('pw_folders_v2', JSON.stringify(folders));
+        localStorage.setItem('pw_holidays_v2', JSON.stringify(holidays));
+        
         displayHomeClasses();
         displayAllClasses();
-        if(!document.getElementById('page-calendar').classList.contains('hidden')) renderCalendar();
+        if(!document.getElementById('page-analysis').classList.contains('hidden')) renderAnalysis();
+    }
+
+    window.exportData = function() {
+        const data = { classes, pdfs, notes, customTypes, folders, holidays };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `TrackerPro_Backup_${currentDateString}.json`;
+        a.click();
+    }
+
+    window.importData = function(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const d = JSON.parse(evt.target.result);
+                if(d.classes) classes = d.classes;
+                if(d.pdfs) pdfs = d.pdfs;
+                if(d.notes) notes = d.notes;
+                if(d.customTypes) customTypes = d.customTypes;
+                if(d.folders) folders = d.folders;
+                if(d.holidays) holidays = d.holidays;
+                saveAllData();
+                renderTypeDropdowns();
+                renderFolderTabs('pdf'); renderFolderTabs('note');
+                alert("Data restored successfully!");
+                window.switchTab('home');
+            } catch(err) { alert("Invalid backup file."); }
+        };
+        reader.readAsText(file);
+    }
+
+    window.clearAllData = function() {
+        if(confirm("Are you sure? This deletes ALL data permanently.")) {
+            classes = []; pdfs = []; notes = []; holidays = [];
+            customTypes = ['College', 'Batch', 'Other'];
+            folders = { pdf: ['General'], note: ['General'] };
+            saveAllData();
+            renderTypeDropdowns();
+            renderFolderTabs('pdf'); renderFolderTabs('note');
+            alert("All data cleared.");
+        }
     }
 
     // --- INIT ---
     renderTypeDropdowns();
-    renderPdfs();
-    renderNotes();
-    saveData(); // initial render
+    renderFolderTabs('pdf');
+    renderFolderTabs('note');
+    saveAllData();
 
 </script>
 </body>
