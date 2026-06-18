@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +25,13 @@
         @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes modalFadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
 
-        body { padding-bottom: 80px; background-color: #f8fafc; }
+        /* Full page modal animation */
+        .page-enter { animation: pageFadeIn 0.2s ease-out forwards; }
+        .page-exit { animation: pageFadeOut 0.2s ease-in forwards; }
+        @keyframes pageFadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pageFadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+
+        body { padding-bottom: 80px; background-color: #f8fafc; overflow-x: hidden; }
         
         .check-anim { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         input[type="checkbox"].done-check:checked + div { background-color: #10b981; border-color: #10b981; }
@@ -33,7 +39,6 @@
 
         .day-label input:checked + div { background-color: #4f46e5; color: white; border-color: #4f46e5; }
         
-        /* Focus Timer Styles */
         .timer-ring { fill: none; stroke: #e0e7ff; stroke-width: 4; }
         .timer-progress { fill: none; stroke: #4f46e5; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
     </style>
@@ -87,43 +92,47 @@
     </main>
 
     <!-- ================= PAGE 2: FOCUS TAB ================= -->
-    <main id="page-focus" class="page-content hidden space-y-6 pt-2">
-        <header class="flex justify-between items-center mb-4">
+    <main id="page-focus" class="page-content hidden space-y-6 pt-2 flex flex-col items-center">
+        <header class="flex justify-between items-center mb-2 w-full">
             <h2 class="text-2xl font-extrabold text-slate-800">Focus Mode</h2>
             <div class="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-100 shadow-sm">
                 <i class="fa-solid fa-fire text-orange-500 mr-1"></i> <span id="todayFocusMins">0</span> mins today
             </div>
         </header>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center relative overflow-hidden">
-            <!-- Timer Circle -->
-            <div class="relative w-64 h-64 mb-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center relative overflow-hidden w-full max-w-sm">
+            <div class="relative w-56 h-56 mb-8">
                 <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
                     <circle cx="50" cy="50" r="45" class="timer-ring"></circle>
                     <circle cx="50" cy="50" r="45" class="timer-progress" id="timerProgress" stroke-dasharray="283" stroke-dashoffset="0"></circle>
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span id="timeDisplay" class="text-6xl font-extrabold text-slate-800 tracking-tighter">25:00</span>
-                    <span id="timerStatus" class="text-sm font-bold text-brand-500 uppercase tracking-widest mt-1">Ready</span>
+                    <span id="timeDisplay" class="text-5xl font-extrabold text-slate-800 tracking-tighter">25:00</span>
+                    <span id="timerStatus" class="text-xs font-bold text-brand-500 uppercase tracking-widest mt-1">Ready</span>
                 </div>
             </div>
 
-            <!-- Controls -->
-            <div class="flex gap-4 w-full max-w-xs">
-                <button id="btnStartTimer" onclick="window.toggleTimer()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-2xl shadow-md shadow-brand-500/30 transition text-lg">
+            <div class="flex gap-4 w-full">
+                <button id="btnStartTimer" onclick="window.toggleTimer()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-2xl shadow-md transition text-lg">
                     Start
                 </button>
-                <button onclick="window.resetTimer()" class="w-16 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition flex items-center justify-center">
+                <button onclick="window.resetTimer()" class="w-14 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-2xl transition flex items-center justify-center">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
 
-            <!-- Settings -->
-            <div class="flex gap-3 mt-6">
-                <button onclick="window.setTimerMode('pomodoro')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow-sm focus-mode-btn" id="btnModePomodoro">25 min</button>
-                <button onclick="window.setTimerMode('shortBreak')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeShort">5 min</button>
-                <button onclick="window.setTimerMode('longBreak')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeLong">15 min</button>
+            <div class="flex gap-2 mt-6 w-full justify-center">
+                <button onclick="window.setTimerMode('pomodoro', 25)" class="flex-1 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow-sm focus-mode-btn" id="btnModePomodoro">25 m</button>
+                <button onclick="window.setTimerMode('shortBreak', 5)" class="flex-1 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeShort">5 m</button>
+                <button onclick="window.setTimerMode('longBreak', 15)" class="flex-1 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeLong">15 m</button>
+                <button onclick="window.setCustomTimer()" class="w-10 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeCustom"><i class="fa-solid fa-clock"></i></button>
             </div>
+        </div>
+
+        <!-- Session History -->
+        <div class="w-full max-w-sm mt-4">
+            <h4 class="font-bold text-slate-800 text-sm mb-3">Recent Sessions</h4>
+            <div id="focusHistoryList" class="space-y-2"></div>
         </div>
     </main>
 
@@ -134,7 +143,6 @@
             <p class="text-xs text-slate-500 font-medium">Your progress and analytics</p>
         </header>
 
-        <!-- Focus Stats Card -->
         <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
             <h3 class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-stopwatch"></i> Focus Time</h3>
             <div class="flex items-end gap-2 mb-1">
@@ -145,44 +153,28 @@
             <i class="fa-solid fa-brain absolute -right-6 -bottom-6 text-8xl text-white opacity-5"></i>
         </div>
 
-        <!-- Attendance Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-graduation-cap"></i> College Attendance</h3>
                 <span id="attPercentText" class="text-2xl font-extrabold text-emerald-500">0%</span>
             </div>
-            
             <div class="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">
                 <div id="attProgressBar" class="bg-emerald-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
             </div>
-
             <div class="grid grid-cols-2 gap-4 text-center mt-2">
-                <div class="bg-slate-50 p-3 rounded-xl">
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Attended</p>
-                    <p class="text-lg font-bold text-slate-700" id="statAtt">0</p>
-                </div>
-                <div class="bg-red-50 p-3 rounded-xl">
-                    <p class="text-[10px] uppercase font-bold text-red-400">Bunked</p>
-                    <p class="text-lg font-bold text-red-600" id="statBnk">0</p>
-                </div>
+                <div class="bg-slate-50 p-3 rounded-xl"><p class="text-[10px] uppercase font-bold text-slate-400">Attended</p><p class="text-lg font-bold text-slate-700" id="statAtt">0</p></div>
+                <div class="bg-red-50 p-3 rounded-xl"><p class="text-[10px] uppercase font-bold text-red-400">Bunked</p><p class="text-lg font-bold text-red-600" id="statBnk">0</p></div>
             </div>
         </div>
 
-        <!-- Data Overview -->
         <div class="grid grid-cols-2 gap-4">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-4">
                 <div class="bg-blue-50 w-10 h-10 rounded-full flex items-center justify-center text-blue-500"><i class="fa-solid fa-file-pdf"></i></div>
-                <div>
-                    <p class="text-xl font-extrabold text-slate-800" id="statPdfCount">0</p>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Saved PDFs</p>
-                </div>
+                <div><p class="text-xl font-extrabold text-slate-800" id="statPdfCount">0</p><p class="text-[10px] font-bold text-slate-400 uppercase">Saved PDFs</p></div>
             </div>
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-4">
                 <div class="bg-purple-50 w-10 h-10 rounded-full flex items-center justify-center text-purple-500"><i class="fa-solid fa-bookmark"></i></div>
-                <div>
-                    <p class="text-xl font-extrabold text-slate-800" id="statNoteCount">0</p>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Total Notes</p>
-                </div>
+                <div><p class="text-xl font-extrabold text-slate-800" id="statNoteCount">0</p><p class="text-[10px] font-bold text-slate-400 uppercase">Total Notes</p></div>
             </div>
         </div>
     </main>
@@ -202,7 +194,6 @@
                 <h3 id="calendarMonthYear" class="font-bold text-lg text-slate-800"></h3>
                 <button onclick="changeMonth(1)" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 hover:bg-slate-100 text-slate-600"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-            
             <div class="grid grid-cols-7 text-center text-xs font-bold text-slate-400 mb-2">
                 <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
             </div>
@@ -219,7 +210,6 @@
     <main id="page-profile" class="page-content hidden space-y-6 pt-2">
         <header class="mb-6"><h2 class="text-2xl font-extrabold text-slate-800">Profile & Account</h2></header>
         
-        <!-- Logged IN View -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center relative overflow-hidden">
             <div class="w-20 h-20 bg-brand-100 rounded-full border-4 border-white shadow-md overflow-hidden mb-3 flex items-center justify-center">
                 <i class="fa-solid fa-user text-3xl text-brand-600"></i>
@@ -238,7 +228,7 @@
     </main>
 </div>
 
-<!-- ================= LOGIN SCREEN (Shown when logged out) ================= -->
+<!-- ================= LOGIN SCREEN ================= -->
 <div id="authScreen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
     <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg shadow-brand-500/40 mb-6">
         <i class="fa-solid fa-graduation-cap"></i>
@@ -266,7 +256,8 @@
     </div>
 </nav>
 
-<!-- ================= MODALS (Add Class, PDF, Notes, Holidays) ================= -->
+<!-- ================= MODALS ================= -->
+
 <!-- ADD CLASS MODAL -->
 <div id="classModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -302,13 +293,13 @@
                         <input type="checkbox" id="isRepeat" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" onchange="document.getElementById('repeatDays').classList.toggle('hidden', !this.checked)"> Repeat Weekly (Next 8 Weeks)
                     </label>
                     <div id="repeatDays" class="hidden flex justify-between gap-1">
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="1" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">M</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="2" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">T</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="3" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">W</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="4" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">T</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="5" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">F</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="6" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">S</div></label>
-                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="0" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">S</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="1" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">M</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="2" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">T</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="3" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">W</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="4" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">T</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="5" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">F</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="6" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">S</div></label>
+                        <label class="day-label cursor-pointer text-center"><input type="checkbox" value="0" class="hidden"><div class="w-9 h-9 rounded-full border border-slate-300 bg-white flex items-center justify-center text-xs font-bold text-slate-500 transition">S</div></label>
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md mt-2 transition">Save Class</button>
@@ -348,13 +339,13 @@
     </div>
 </div>
 
-<!-- NOTES MODAL -->
+<!-- NOTES LIST MODAL -->
 <div id="notesModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-purple-50">
             <div class="flex items-center gap-2 text-purple-700 font-bold text-lg"><i class="fa-regular fa-bookmark"></i> Notes</div>
             <div class="flex gap-2">
-                <button onclick="window.openModal('addNoteModal')" class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-plus"></i></button>
+                <button onclick="window.openFullNoteModal()" class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-plus"></i></button>
                 <button onclick="window.closeModal('notesModal')" class="bg-white/50 text-purple-700 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
@@ -363,19 +354,21 @@
     </div>
 </div>
 
-<div id="addNoteModal" class="hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-        <h3 class="font-bold text-lg mb-4">Create Note</h3>
-        <input type="text" id="noteTitle" placeholder="Note Title" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-t-lg outline-none font-bold">
-        <textarea id="noteContent" rows="4" placeholder="Write contents or checklists..." class="w-full px-4 py-3 bg-slate-50 border-x border-b border-slate-200 rounded-b-lg mb-3 outline-none resize-none"></textarea>
+<!-- FULL PAGE NOTE EDITOR -->
+<div id="fullNoteModal" class="hidden fixed inset-0 z-[70] bg-white flex flex-col page-exit">
+    <div class="flex justify-between items-center p-4 border-b border-slate-100 shadow-sm bg-white">
+        <button onclick="window.closeFullNoteModal()" class="text-slate-500 p-2"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+        <h3 class="font-bold text-lg text-slate-800" id="noteModalHeader">Write Note</h3>
+        <button onclick="window.saveNote()" class="text-purple-600 font-bold p-2 text-lg">Save</button>
+    </div>
+    <div class="p-5 flex-1 flex flex-col bg-slate-50">
+        <input type="hidden" id="editNoteId" value="">
+        <input type="text" id="noteTitle" placeholder="Document Title" class="w-full text-2xl font-extrabold mb-4 outline-none bg-transparent placeholder-slate-300 text-slate-800">
         <div class="flex gap-2 mb-4">
-            <select id="noteFolderSelect" class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm"></select>
-            <button onclick="window.addFolder('note')" class="bg-slate-100 px-4 rounded-lg font-bold text-slate-600"><i class="fa-solid fa-folder-plus"></i></button>
+            <select id="noteFolderSelect" class="flex-1 p-3 bg-white border border-slate-200 rounded-xl outline-none text-sm font-medium shadow-sm"></select>
+            <button onclick="window.addFolder('note')" class="bg-white border border-slate-200 px-4 rounded-xl font-bold text-slate-600 shadow-sm"><i class="fa-solid fa-folder-plus"></i></button>
         </div>
-        <div class="flex gap-2">
-            <button onclick="window.closeModal('addNoteModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-3 rounded-lg">Cancel</button>
-            <button onclick="window.addNote()" class="flex-1 bg-purple-600 text-white font-bold py-3 rounded-lg">Save</button>
-        </div>
+        <textarea id="noteContent" placeholder="Start writing here..." class="w-full flex-1 outline-none resize-none text-slate-700 leading-relaxed bg-transparent placeholder-slate-400 text-base"></textarea>
     </div>
 </div>
 
@@ -398,7 +391,6 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
-    // YOUR KEYS
     const firebaseConfig = {
         apiKey: "AIzaSyDQmE65lN8guR6oH2lKUe1jE1932HIAmmc",
         authDomain: "tracker-pro-6e84f.firebaseapp.com",
@@ -420,7 +412,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Core Cloud Save Function (No Local Storage)
         window.saveDataToCloud = async function() {
             if(!window.cloudUserUid) return;
             try {
@@ -428,13 +419,12 @@
                     classes: window.appState.classes, pdfs: window.appState.pdfs,
                     notes: window.appState.notes, customTypes: window.appState.customTypes,
                     folders: window.appState.folders, holidays: window.appState.holidays,
-                    focusStats: window.appState.focusStats
+                    focusStats: window.appState.focusStats, focusHistory: window.appState.focusHistory
                 });
                 window.updateUI();
             } catch(e) { console.error("Cloud save failed:", e); }
         };
 
-        // Login Action
         btnLogin.addEventListener('click', () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -442,12 +432,10 @@
             
             btnLogin.innerText = "Loading...";
             signInWithEmailAndPassword(auth, email, password).catch(error => {
-                btnLogin.innerText = "Login";
-                alert("Login Failed: " + error.message);
+                btnLogin.innerText = "Login"; alert("Login Failed: " + error.message);
             });
         });
 
-        // Register Action
         btnRegister.addEventListener('click', () => {
             const email = document.getElementById('emailInput').value.trim();
             const password = document.getElementById('passwordInput').value.trim();
@@ -455,31 +443,23 @@
             
             btnRegister.innerText = "Loading...";
             createUserWithEmailAndPassword(auth, email, password).catch(error => {
-                btnRegister.innerText = "Create Account";
-                alert("Registration Failed: " + error.message);
+                btnRegister.innerText = "Create Account"; alert("Registration Failed: " + error.message);
             });
         });
 
-        // Sign Out Action
         btnSignOut.addEventListener('click', () => {
-            if(confirm("Sign out? Your data will remain safe in the cloud.")) {
-                signOut(auth);
-            }
+            if(confirm("Sign out? Data is safely synced to the cloud.")) signOut(auth);
         });
 
-        // State Change Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // UI Switch to App
                 authScreen.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 bottomNav.classList.remove('hidden');
                 document.getElementById('userEmail').innerText = user.email;
                 document.getElementById('greetingName').innerText = "Hi, " + user.email.split('@')[0] + " 👋";
-                
                 window.cloudUserUid = user.uid;
                 
-                // Fetch user specific data from Cloud
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
                     if (docSnap.exists()) {
@@ -491,30 +471,26 @@
                         window.appState.folders = d.folders || { pdf: ['General'], note: ['General'] };
                         window.appState.holidays = d.holidays || [];
                         window.appState.focusStats = d.focusStats || {};
+                        window.appState.focusHistory = d.focusHistory || [];
                     } else {
-                        // Brand new user, set defaults
-                        window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = []; window.appState.holidays = []; window.appState.focusStats = {};
+                        window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = []; window.appState.holidays = []; window.appState.focusStats = {}; window.appState.focusHistory = [];
                         window.appState.customTypes = ['College', 'Batch', 'Other']; window.appState.folders = { pdf: ['General'], note: ['General'] };
                         window.saveDataToCloud(); 
                     }
                     window.updateUI();
                     window.renderTypeDropdowns();
                     window.renderFolderTabs('pdf'); window.renderFolderTabs('note');
-                    window.switchTab('home'); // Go home on login
-                    
+                    window.switchTab('home'); 
                 } catch(e) { console.error(e); }
                 
             } else {
-                // Wipe Local Memory for Security
                 window.cloudUserUid = null;
+                // Wipe local state entirely
                 window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = [];
-                
-                // UI Switch to Login
                 authScreen.classList.remove('hidden');
                 appContainer.classList.add('hidden');
                 bottomNav.classList.add('hidden');
-                btnLogin.innerText = "Login";
-                btnRegister.innerText = "Create Account";
+                btnLogin.innerText = "Login"; btnRegister.innerText = "Create Account";
             }
         });
     } catch (e) { console.error(e); }
@@ -522,16 +498,15 @@
 
 <!-- STANDARD APP LOGIC -->
 <script>
-    // In-memory state only (NO LOCAL STORAGE)
+    // State strictly memory-only (no local storage)
     window.appState = {
         classes: [], pdfs: [], notes: [], customTypes: ['College', 'Batch', 'Other'],
-        folders: { pdf: ['General'], note: ['General'] }, holidays: [], focusStats: {}
+        folders: { pdf: ['General'], note: ['General'] }, holidays: [], focusStats: {}, focusHistory: []
     };
     
     let activePdfFolder = 'General'; let activeNoteFolder = 'General';
     let currentMonth = new Date().getMonth(); let currentYear = new Date().getFullYear();
 
-    // Date calculations
     const todayObj = new Date();
     const offset = todayObj.getTimezoneOffset();
     const todayLocal = new Date(todayObj.getTime() - (offset*60*1000));
@@ -544,7 +519,6 @@
     const quotes = ["Push yourself, because no one else is going to do it for you.", "Sometimes later becomes never. Do it now.", "Great things never come from comfort zones.", "Success doesn't just find you. You have to go out and get it.", "The harder you work for something, the greater you'll feel."];
     document.getElementById('dailyQuote').innerText = `"${quotes[todayObj.getDay() % quotes.length]}"`;
 
-    // Navigation
     window.switchTab = function(tabId) {
         document.querySelectorAll('.page-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('block'); });
         document.getElementById(`page-${tabId}`).classList.remove('hidden'); document.getElementById(`page-${tabId}`).classList.add('block');
@@ -552,11 +526,9 @@
         document.getElementById(`nav-${tabId}`).classList.remove('text-slate-400'); document.getElementById(`nav-${tabId}`).classList.add('text-brand-600');
         window.scrollTo(0, 0);
         
-        // Tab Specific Actions
         if(tabId === 'calendar') {
             window.renderCalendar();
-            // Automatically select today's date when opening calendar
-            window.selectCalendarDate(currentDateString);
+            window.selectCalendarDate(currentDateString); // Auto select today
         }
         if(tabId === 'analysis') window.renderAnalysis();
         if(tabId === 'focus') window.updateFocusUI();
@@ -568,10 +540,10 @@
     function isCollegeType(type) { const t = type.toLowerCase(); return t.includes('college') || t.includes('bsc') || t.includes('bed') || t.includes('university'); }
     function formatTime(tStr) { if (!tStr) return ''; const [h, m] = tStr.split(':'); let hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM'; return `${hr % 12 || 12}:${m} ${ampm}`; }
 
-    // Classes & Types
     window.renderTypeDropdowns = function() {
         const html = window.appState.customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
         document.getElementById('type').innerHTML = html;
+        document.getElementById('homeTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
     }
 
     window.addNewType = function() {
@@ -617,24 +589,36 @@
 
         if (isColl) {
             const getBtnCls = (check) => cls.status === check ? `bg-brand-600 text-white border-brand-600` : `bg-white text-slate-500 border-slate-200 hover:bg-slate-50`;
-            actionArea = `<div class="mt-3 flex gap-2"><button onclick="window.updateStatus('${cls.id}', 'Attended')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Attended')}">Attend</button><button onclick="window.updateStatus('${cls.id}', 'Bunked')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Bunked')}">Bunk</button><button onclick="window.updateStatus('${cls.id}', 'Holiday')" class="flex-1 text-[11px] uppercase tracking-wide font-bold py-2 rounded-lg border transition ${getBtnCls('Holiday')}">Holiday</button></div>`;
+            actionArea = `<div class="mt-2 flex gap-1.5"><button onclick="window.updateStatus('${cls.id}', 'Attended')" class="flex-1 text-[10px] uppercase tracking-wide font-bold py-1.5 rounded border transition ${getBtnCls('Attended')}">Attend</button><button onclick="window.updateStatus('${cls.id}', 'Bunked')" class="flex-1 text-[10px] uppercase tracking-wide font-bold py-1.5 rounded border transition ${getBtnCls('Bunked')}">Bunk</button><button onclick="window.updateStatus('${cls.id}', 'Holiday')" class="flex-1 text-[10px] uppercase tracking-wide font-bold py-1.5 rounded border transition ${getBtnCls('Holiday')}">Holiday</button></div>`;
         } else {
             const isDone = cls.status === 'Done';
-            actionArea = `<div class="mt-3 flex justify-between items-center border-t border-slate-100 pt-3"><label class="flex items-center gap-2 cursor-pointer"><div class="relative flex items-center justify-center w-5 h-5 rounded border border-slate-300 bg-white"><input type="checkbox" class="peer sr-only done-check" ${isDone ? 'checked' : ''} onchange="window.updateStatus('${cls.id}', this.checked ? 'Done' : 'Pending')"><div class="absolute inset-0 rounded flex items-center justify-center check-anim"><svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div><span class="text-sm font-bold ${isDone ? 'text-emerald-600 line-through opacity-70' : 'text-slate-600'}">Mark Done</span></label><button onclick="window.deleteClass('${cls.id}')" class="text-slate-300 hover:text-red-500 bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`;
+            actionArea = `<div class="mt-2 flex justify-between items-center"><label class="flex items-center gap-2 cursor-pointer"><div class="relative flex items-center justify-center w-4 h-4 rounded border border-slate-300 bg-white"><input type="checkbox" class="peer sr-only done-check" ${isDone ? 'checked' : ''} onchange="window.updateStatus('${cls.id}', this.checked ? 'Done' : 'Pending')"><div class="absolute inset-0 rounded flex items-center justify-center check-anim"><svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div><span class="text-xs font-bold ${isDone ? 'text-emerald-600 line-through opacity-70' : 'text-slate-500'}">Done</span></label><button onclick="window.deleteClass('${cls.id}')" class="text-slate-300 hover:text-red-500 bg-slate-50 w-6 h-6 rounded flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button></div>`;
         }
 
         const cardStyle = isColl ? 'border-l-4 border-l-brand-500' : 'border border-slate-200';
-        return `<div class="bg-white p-4 rounded-2xl shadow-sm ${cardStyle} relative">${isColl && cls.status === 'Holiday' ? `<div class="absolute top-3 right-3 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Holiday</div>` : ''}${isColl && cls.status === 'Bunked' ? `<div class="absolute top-3 right-3 bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Bunked</div>` : ''}<div class="flex items-center gap-2 mb-1"><span class="text-[10px] font-bold text-brand-700 bg-brand-100 px-2 py-1 rounded-md uppercase tracking-wider">${cls.type}</span><span class="text-xs font-medium text-slate-400"><i class="fa-regular fa-clock"></i> ${tStr || 'Anytime'}</span></div><h4 class="font-bold text-slate-800 text-lg w-[80%]">${cls.name}</h4><p class="text-xs font-medium text-slate-400 mt-0.5">${cls.date}</p>${actionArea}${isColl ? `<button onclick="window.deleteClass('${cls.id}')" class="absolute bottom-3 right-3 text-slate-300 hover:text-red-500 bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button>` : ''}</div>`;
+        return `
+            <div class="bg-white p-3 rounded-xl shadow-sm ${cardStyle} relative">
+                ${isColl && cls.status === 'Holiday' ? `<div class="absolute top-2 right-2 bg-yellow-100 text-yellow-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Holiday</div>` : ''}
+                ${isColl && cls.status === 'Bunked' ? `<div class="absolute top-2 right-2 bg-red-100 text-red-700 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">Bunked</div>` : ''}
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="font-bold text-slate-800 text-[15px] leading-tight w-[75%] truncate">${cls.name}</h4>
+                    <span class="text-[9px] font-bold text-brand-700 bg-brand-50 border border-brand-100 px-1.5 py-0.5 rounded uppercase tracking-wider">${cls.type}</span>
+                </div>
+                <div class="text-[11px] font-medium text-slate-400 mb-2"><i class="fa-regular fa-clock"></i> ${tStr || 'Anytime'}</div>
+                ${actionArea}
+                ${isColl ? `<button onclick="window.deleteClass('${cls.id}')" class="absolute bottom-2 right-2 text-slate-300 hover:text-red-500 w-6 h-6 rounded flex items-center justify-center"><i class="fa-solid fa-trash-can text-xs"></i></button>` : ''}
+            </div>
+        `;
     }
 
     window.displayHomeClasses = function() {
-        let filterEle = document.getElementById('homeTypeFilter');
+        const filterEle = document.getElementById('homeTypeFilter');
         if(!filterEle) return;
         const filter = filterEle.value || "All";
         let todays = window.appState.classes.filter(c => c.date === currentDateString);
         if (filter !== 'All') todays = todays.filter(c => c.type === filter);
         todays.sort((a,b) => (a.time||"24:00").localeCompare(b.time||"24:00"));
-        document.getElementById('homeClassesList').innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-medium text-sm">No classes for today.</p></div>`;
+        document.getElementById('homeClassesList').innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-6 bg-white rounded-xl border border-dashed border-slate-200"><p class="text-slate-400 font-medium text-sm">No classes for today.</p></div>`;
     }
 
     window.updateStatus = function(id, st) { const c = window.appState.classes.find(x => x.id === id); if(c) { c.status = st; window.saveDataToCloud(); } }
@@ -657,6 +641,7 @@
     window.setActiveFolder = function(type, f) { if(type === 'pdf') { activePdfFolder = f; window.renderPdfs(); } else { activeNoteFolder = f; window.renderNotes(); } window.renderFolderTabs(type); }
     window.addFolder = function(type) { const n = prompt("New Folder Name:"); if(n && n.trim() && !window.appState.folders[type].includes(n.trim())) { window.appState.folders[type].push(n.trim()); window.saveDataToCloud(); window.renderFolderTabs(type); document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').value = n.trim(); } }
 
+    // PDFs
     window.renderPdfs = function() {
         const filtered = window.appState.pdfs.filter(p => p.folder === activePdfFolder);
         if(filtered.length === 0) { document.getElementById('pdfList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
@@ -665,17 +650,119 @@
     window.addPdf = function() { const title = document.getElementById('pdfTitle').value.trim(); const url = document.getElementById('pdfUrl').value.trim(); const fld = document.getElementById('pdfFolderSelect').value; if(title && url) { window.appState.pdfs.push({ id: Date.now().toString(), title, url, folder: fld }); window.saveDataToCloud(); document.getElementById('pdfTitle').value = ''; document.getElementById('pdfUrl').value = ''; window.closeModal('addPdfModal'); window.setActiveFolder('pdf', fld); } }
     window.deletePdf = function(id) { window.appState.pdfs = window.appState.pdfs.filter(p => p.id !== id); window.saveDataToCloud(); window.renderPdfs(); }
 
+    // Notes (Swipe to Edit/Delete)
+    let ntX = 0; let activeNoteId = null;
+    window.ntStart = e => { ntX = e.changedTouches[0].screenX; };
+    window.ntEnd = (e, id) => {
+        let dX = e.changedTouches[0].screenX - ntX;
+        let el = document.getElementById('note-fg-'+id);
+        if(dX < -40) { // Swiped left
+            if(activeNoteId && activeNoteId !== id) document.getElementById('note-fg-'+activeNoteId).style.transform = 'translateX(0)';
+            el.style.transform = 'translateX(-120px)';
+            activeNoteId = id;
+        } else if(dX > 40) { // Swiped right
+            el.style.transform = 'translateX(0)';
+            activeNoteId = null;
+        }
+    };
+
     window.renderNotes = function() {
         const filtered = window.appState.notes.filter(n => n.folder === activeNoteFolder);
         if(filtered.length === 0) { document.getElementById('notesList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
-        document.getElementById('notesList').innerHTML = filtered.map(n => `<div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 shadow-sm relative pr-8"><h5 class="font-bold text-sm text-purple-900 mb-1">${n.title}</h5><p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">${n.content}</p><span class="text-[9px] font-bold text-purple-400/80 uppercase tracking-widest block mt-3">${n.date}</span><button onclick="window.deleteNote('${n.id}')" class="absolute top-3 right-3 text-purple-300 hover:text-red-500 w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`).join('');
+        
+        document.getElementById('notesList').innerHTML = filtered.map(n => `
+            <div class="relative overflow-hidden rounded-2xl mb-3 shadow-sm border border-slate-200 bg-slate-100">
+                <div class="absolute inset-y-0 right-0 flex">
+                    <button onclick="window.editNote('${n.id}')" class="w-[60px] bg-blue-500 text-white flex justify-center items-center text-xl transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="window.deleteNote('${n.id}')" class="w-[60px] bg-red-500 text-white flex justify-center items-center text-xl transition"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div id="note-fg-${n.id}" class="relative bg-purple-50 p-4 transition-transform duration-200 ease-out z-10 w-full" ontouchstart="window.ntStart(event)" ontouchend="window.ntEnd(event, '${n.id}')">
+                    <h5 class="font-bold text-sm text-purple-900 mb-1">${n.title}</h5>
+                    <p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">${n.content.substring(0, 100)}${n.content.length > 100 ? '...' : ''}</p>
+                    <span class="text-[9px] font-bold text-purple-400/80 uppercase tracking-widest block mt-3">${n.date}</span>
+                </div>
+            </div>
+        `).join('');
     }
-    window.addNote = function() { const title = document.getElementById('noteTitle').value.trim(); const content = document.getElementById('noteContent').value.trim(); const fld = document.getElementById('noteFolderSelect').value; if(title || content) { window.appState.notes.push({ id: Date.now().toString(), title: title || 'Untitled', content, date: currentDateString, folder: fld }); window.saveDataToCloud(); document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; window.closeModal('addNoteModal'); window.setActiveFolder('note', fld); } }
-    window.deleteNote = function(id) { window.appState.notes = window.appState.notes.filter(n => n.id !== id); window.saveDataToCloud(); window.renderNotes(); }
+
+    // Full Page Note Editor Logic
+    window.openFullNoteModal = function() {
+        activeNoteId = null; // reset swiped notes
+        document.getElementById('editNoteId').value = '';
+        document.getElementById('noteTitle').value = '';
+        document.getElementById('noteContent').value = '';
+        document.getElementById('noteModalHeader').innerText = "Create Note";
+        
+        const m = document.getElementById('fullNoteModal');
+        m.classList.remove('hidden', 'page-exit'); m.classList.add('page-enter');
+    }
+
+    window.closeFullNoteModal = function() {
+        const m = document.getElementById('fullNoteModal');
+        m.classList.remove('page-enter'); m.classList.add('page-exit');
+        setTimeout(() => m.classList.add('hidden'), 200);
+    }
+
+    window.editNote = function(id) {
+        const note = window.appState.notes.find(n => n.id === id);
+        if(!note) return;
+        
+        // Reset swipe state
+        document.getElementById('note-fg-'+id).style.transform = 'translateX(0)';
+        activeNoteId = null;
+
+        document.getElementById('editNoteId').value = note.id;
+        document.getElementById('noteTitle').value = note.title;
+        document.getElementById('noteContent').value = note.content;
+        document.getElementById('noteFolderSelect').value = note.folder;
+        document.getElementById('noteModalHeader').innerText = "Edit Note";
+        
+        const m = document.getElementById('fullNoteModal');
+        m.classList.remove('hidden', 'page-exit'); m.classList.add('page-enter');
+    }
+
+    window.saveNote = function() {
+        const id = document.getElementById('editNoteId').value;
+        const title = document.getElementById('noteTitle').value.trim() || 'Untitled';
+        const content = document.getElementById('noteContent').value.trim();
+        const fld = document.getElementById('noteFolderSelect').value;
+        
+        if(!content) { alert("Note cannot be empty"); return; }
+
+        if(id) {
+            // Edit existing
+            const noteIndex = window.appState.notes.findIndex(n => n.id === id);
+            if(noteIndex > -1) {
+                window.appState.notes[noteIndex].title = title;
+                window.appState.notes[noteIndex].content = content;
+                window.appState.notes[noteIndex].folder = fld;
+            }
+        } else {
+            // Add new
+            window.appState.notes.unshift({ id: Date.now().toString(), title, content, date: currentDateString, folder: fld });
+        }
+        
+        window.saveDataToCloud();
+        window.closeFullNoteModal();
+        window.setActiveFolder('note', fld);
+    }
+
+    window.deleteNote = function(id) { 
+        if(confirm("Are you sure you want to permanently delete this note?")) {
+            window.appState.notes = window.appState.notes.filter(n => n.id !== id); 
+            window.saveDataToCloud(); 
+            window.renderNotes(); 
+        } else {
+            // reset swipe
+            document.getElementById('note-fg-'+id).style.transform = 'translateX(0)';
+            activeNoteId = null;
+        }
+    }
 
     window.addGlobalHoliday = function() { const title = document.getElementById('holTitle').value.trim(); const date = document.getElementById('holDate').value; if(title && date) { window.appState.holidays.push({ date, title }); window.appState.classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; }); window.saveDataToCloud(); document.getElementById('holTitle').value = ''; window.closeModal('holidayModal'); } }
 
     window.changeMonth = function(dir) { currentMonth += dir; if(currentMonth > 11) { currentMonth = 0; currentYear++; } else if(currentMonth < 0) { currentMonth = 11; currentYear--; } window.renderCalendar(); }
+    
     window.renderCalendar = function() {
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         document.getElementById('calendarMonthYear').innerText = `${monthNames[currentMonth]} ${currentYear}`;
@@ -718,7 +805,6 @@
 
     // Modern Analysis
     window.renderAnalysis = function() {
-        // Attendance logic
         let collegeCls = window.appState.classes.filter(c => isCollegeType(c.type) && c.status !== 'Pending' && c.status !== 'Holiday');
         let att = collegeCls.filter(c => c.status === 'Attended' || c.status === 'Done').length;
         let bnked = collegeCls.filter(c => c.status === 'Bunked').length;
@@ -730,107 +816,106 @@
         document.getElementById('attPercentText').innerText = pct + '%';
         document.getElementById('attProgressBar').style.width = pct + '%';
         
-        // Progress bar color logic
         const bar = document.getElementById('attProgressBar');
         bar.className = 'h-3 rounded-full transition-all duration-1000 ' + (pct >= 75 ? 'bg-emerald-500' : (pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'));
 
-        // Focus & Overview logic
         let totalFocusAllTime = Object.values(window.appState.focusStats).reduce((a, b) => a + b, 0);
         let focusToday = window.appState.focusStats[currentDateString] || 0;
         
         document.getElementById('statTotalFocus').innerText = totalFocusAllTime;
         document.getElementById('statTodayFocusDesc').innerText = `${focusToday} mins focused today`;
-
         document.getElementById('statPdfCount').innerText = window.appState.pdfs.length;
         document.getElementById('statNoteCount').innerText = window.appState.notes.length;
     }
 
     // Focus Timer Logic
-    let focusTimerInterval;
-    let focusTimeLeft = 25 * 60;
-    let focusTotalDuration = 25 * 60;
-    let isFocusRunning = false;
+    let focusTimerInterval; let focusTimeLeft = 25 * 60; let focusTotalDuration = 25 * 60; let isFocusRunning = false;
 
     window.updateFocusUI = function() {
-        const mins = Math.floor(focusTimeLeft / 60);
-        const secs = focusTimeLeft % 60;
+        const mins = Math.floor(focusTimeLeft / 60); const secs = focusTimeLeft % 60;
         document.getElementById('timeDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        
         const progress = document.getElementById('timerProgress');
         const percentage = focusTimeLeft / focusTotalDuration;
         progress.style.strokeDashoffset = 283 - (283 * percentage);
-        
         document.getElementById('todayFocusMins').innerText = window.appState.focusStats[currentDateString] || 0;
+        
+        // Render History
+        const histList = document.getElementById('focusHistoryList');
+        if(window.appState.focusHistory.length === 0) {
+            histList.innerHTML = '<p class="text-xs text-slate-400 italic">No completed sessions yet.</p>';
+        } else {
+            // Show last 5 sessions
+            histList.innerHTML = [...window.appState.focusHistory].reverse().slice(0, 5).map(h => `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div>
+                        <p class="text-sm font-bold text-slate-700">${h.duration} mins focus</p>
+                        <p class="text-[10px] text-slate-400">${h.date} • ${new Date(h.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>
+                    <i class="fa-solid fa-check-circle text-emerald-500"></i>
+                </div>
+            `).join('');
+        }
     }
 
-    window.setTimerMode = function(mode) {
+    window.setTimerMode = function(mode, mins) {
         if(isFocusRunning) window.toggleTimer();
         document.querySelectorAll('.focus-mode-btn').forEach(b => { b.classList.remove('bg-slate-800', 'text-white'); b.classList.add('bg-slate-100', 'text-slate-500'); });
         
-        if(mode === 'pomodoro') { focusTimeLeft = 25 * 60; document.getElementById('btnModePomodoro').classList.add('bg-slate-800', 'text-white'); }
-        if(mode === 'shortBreak') { focusTimeLeft = 5 * 60; document.getElementById('btnModeShort').classList.add('bg-slate-800', 'text-white'); }
-        if(mode === 'longBreak') { focusTimeLeft = 15 * 60; document.getElementById('btnModeLong').classList.add('bg-slate-800', 'text-white'); }
+        focusTimeLeft = mins * 60;
+        if(mode === 'pomodoro') document.getElementById('btnModePomodoro').classList.add('bg-slate-800', 'text-white');
+        else if(mode === 'shortBreak') document.getElementById('btnModeShort').classList.add('bg-slate-800', 'text-white');
+        else if(mode === 'longBreak') document.getElementById('btnModeLong').classList.add('bg-slate-800', 'text-white');
+        else if(mode === 'custom') document.getElementById('btnModeCustom').classList.add('bg-slate-800', 'text-white');
         
         focusTotalDuration = focusTimeLeft;
         document.getElementById('timerStatus').innerText = "Ready";
         window.updateFocusUI();
     }
 
+    window.setCustomTimer = function() {
+        const val = prompt("Enter focus time in minutes (e.g., 45):", "30");
+        if(val && !isNaN(val) && parseInt(val) > 0) {
+            window.setTimerMode('custom', parseInt(val));
+        }
+    }
+
     window.toggleTimer = function() {
-        const btn = document.getElementById('btnStartTimer');
-        const status = document.getElementById('timerStatus');
+        const btn = document.getElementById('btnStartTimer'); const status = document.getElementById('timerStatus');
         if (isFocusRunning) {
-            clearInterval(focusTimerInterval);
-            isFocusRunning = false;
-            btn.innerText = "Resume";
-            btn.classList.replace('bg-orange-500', 'bg-brand-600');
-            btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700');
-            status.innerText = "Paused";
+            clearInterval(focusTimerInterval); isFocusRunning = false;
+            btn.innerText = "Resume"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700'); status.innerText = "Paused";
         } else {
-            isFocusRunning = true;
-            btn.innerText = "Pause";
-            btn.classList.replace('bg-brand-600', 'bg-orange-500');
-            btn.classList.replace('hover:bg-brand-700', 'hover:bg-orange-600');
-            status.innerText = "Focusing...";
+            isFocusRunning = true; btn.innerText = "Pause"; btn.classList.replace('bg-brand-600', 'bg-orange-500'); btn.classList.replace('hover:bg-brand-700', 'hover:bg-orange-600'); status.innerText = "Focusing...";
             
             focusTimerInterval = setInterval(() => {
-                focusTimeLeft--;
-                window.updateFocusUI();
-                
-                // When timer completes
+                focusTimeLeft--; window.updateFocusUI();
                 if(focusTimeLeft <= 0) {
-                    clearInterval(focusTimerInterval);
-                    isFocusRunning = false;
-                    btn.innerText = "Start";
-                    btn.classList.replace('bg-orange-500', 'bg-brand-600');
-                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700');
-                    status.innerText = "Done!";
+                    clearInterval(focusTimerInterval); isFocusRunning = false;
+                    btn.innerText = "Start"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700'); status.innerText = "Done!";
                     
-                    // Add to stats if it was a Pomodoro session
-                    if(focusTotalDuration === 25 * 60) {
-                        const todayStats = window.appState.focusStats[currentDateString] || 0;
-                        window.appState.focusStats[currentDateString] = todayStats + 25;
-                        window.saveDataToCloud();
-                        alert("Pomodoro Complete! Great job focusing.");
-                    } else {
-                        alert("Break time is over! Back to work.");
-                    }
-                    window.setTimerMode('pomodoro');
+                    // Add to stats
+                    const completedMins = Math.floor(focusTotalDuration / 60);
+                    const todayStats = window.appState.focusStats[currentDateString] || 0;
+                    window.appState.focusStats[currentDateString] = todayStats + completedMins;
+                    
+                    // Add to history
+                    window.appState.focusHistory.push({
+                        id: Date.now(), date: currentDateString, duration: completedMins, timestamp: Date.now()
+                    });
+                    
+                    window.saveDataToCloud();
+                    alert(`Timer Complete! +${completedMins} mins added to focus stats.`);
+                    window.setTimerMode('pomodoro', 25);
                 }
             }, 1000);
         }
     }
 
-    window.resetTimer = function() {
-        if(isFocusRunning) window.toggleTimer();
-        focusTimeLeft = focusTotalDuration;
-        document.getElementById('timerStatus').innerText = "Ready";
-        window.updateFocusUI();
-    }
-
+    window.resetTimer = function() { if(isFocusRunning) window.toggleTimer(); focusTimeLeft = focusTotalDuration; document.getElementById('timerStatus').innerText = "Ready"; window.updateFocusUI(); }
 </script>
 </body>
 </html>
 
 
+```
 
