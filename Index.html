@@ -33,24 +33,26 @@
 
         .day-label input:checked + div { background-color: #4f46e5; color: white; border-color: #4f46e5; }
         
-        .circular-chart { display: block; margin: 0 auto; max-width: 80%; max-height: 250px; }
-        .circle-bg { fill: none; stroke: #e2e8f0; stroke-width: 3.8; }
-        .circle { fill: none; stroke-width: 3.8; stroke-linecap: round; transition: stroke-dasharray 1s ease-out; }
+        /* Focus Timer Styles */
+        .timer-ring { fill: none; stroke: #e0e7ff; stroke-width: 4; }
+        .timer-progress { fill: none; stroke: #4f46e5; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
     </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen">
 
-<div class="max-w-2xl mx-auto p-4 space-y-6">
+<!-- MAIN APP WRAPPER (Hidden until logged in) -->
+<div id="appContainer" class="hidden max-w-2xl mx-auto p-4 space-y-6">
 
+    <!-- ================= PAGE 1: HOME ================= -->
     <main id="page-home" class="page-content block space-y-6">
         <header class="flex justify-between items-center pt-2">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Prashant 👋</h1>
+                <h1 id="greetingName" class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Scholar 👋</h1>
                 <p class="text-sm text-slate-500 font-medium" id="homeDateDisplay"></p>
             </div>
-            <div id="homeProfileIcon" class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm border-2 border-white overflow-hidden">
-                <i class="fa-solid fa-user-graduate text-xl"></i>
-            </div>
+            <button onclick="window.openModal('classModal')" class="bg-brand-600 text-white w-10 h-10 rounded-full shadow-md flex items-center justify-center hover:bg-brand-700 transition">
+                <i class="fa-solid fa-plus"></i>
+            </button>
         </header>
         
         <div class="bg-gradient-to-r from-brand-600 to-indigo-800 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
@@ -84,49 +86,108 @@
         </div>
     </main>
 
-    <main id="page-schedule" class="page-content hidden space-y-4 pt-2">
-        <header class="flex justify-between items-center mb-6">
-            <div>
-                <h2 class="text-2xl font-extrabold text-slate-800">All Classes</h2>
-                <p class="text-xs text-slate-500"><span id="classCount">0</span> total scheduled</p>
+    <!-- ================= PAGE 2: FOCUS TAB ================= -->
+    <main id="page-focus" class="page-content hidden space-y-6 pt-2">
+        <header class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-extrabold text-slate-800">Focus Mode</h2>
+            <div class="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-100 shadow-sm">
+                <i class="fa-solid fa-fire text-orange-500 mr-1"></i> <span id="todayFocusMins">0</span> mins today
             </div>
-            <button onclick="window.openModal('classModal')" class="bg-brand-600 text-white font-bold py-2 px-4 rounded-xl shadow-md flex items-center gap-2 hover:bg-brand-700">
-                <i class="fa-solid fa-plus"></i> Add
-            </button>
-        </header>
-        
-        <div id="allClassesList" class="space-y-4"></div>
-        
-        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center">
-            <div class="bg-slate-200 w-16 h-16 rounded-full flex items-center justify-center mb-4"><i class="fa-regular fa-calendar-xmark text-2xl text-slate-500"></i></div>
-            <h3 class="text-lg font-bold text-slate-700">No classes found</h3>
-            <p class="text-slate-500 text-sm mt-1">Tap the Add button to schedule classes.</p>
-        </div>
-    </main>
-
-    <main id="page-analysis" class="page-content hidden space-y-6 pt-2">
-        <header class="flex justify-between items-center mb-2">
-            <h2 class="text-2xl font-extrabold text-slate-800">Analysis</h2>
-            <select id="analysisTypeFilter" onchange="window.renderAnalysis()" class="bg-white border border-slate-200 text-slate-600 text-sm font-bold py-2 px-3 rounded-xl outline-none shadow-sm"></select>
         </header>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center">
-            <h3 class="font-bold text-slate-500 text-sm tracking-wide uppercase mb-4" id="analysisTitle">Overall Attendance</h3>
-            <svg viewBox="0 0 36 36" class="circular-chart w-40 h-40 mb-2">
-                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                <path class="circle stroke-brand-500" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" id="attendanceCircle" />
-                <text x="18" y="20.5" class="text-3xl font-bold fill-slate-800" text-anchor="middle" id="attendanceText">0%</text>
-            </svg>
-            <p class="text-xs text-slate-400 mb-6">Based on completed vs missed classes</p>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+            <!-- Timer Circle -->
+            <div class="relative w-64 h-64 mb-8">
+                <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
+                    <circle cx="50" cy="50" r="45" class="timer-ring"></circle>
+                    <circle cx="50" cy="50" r="45" class="timer-progress" id="timerProgress" stroke-dasharray="283" stroke-dashoffset="0"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="timeDisplay" class="text-6xl font-extrabold text-slate-800 tracking-tighter">25:00</span>
+                    <span id="timerStatus" class="text-sm font-bold text-brand-500 uppercase tracking-widest mt-1">Ready</span>
+                </div>
+            </div>
 
-            <div class="grid grid-cols-3 w-full gap-2 text-center border-t border-slate-100 pt-4">
-                <div><p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Attended</p><p class="text-xl font-bold text-emerald-600" id="statAttended">0</p></div>
-                <div class="border-x border-slate-100"><p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Bunked/Missed</p><p class="text-xl font-bold text-red-500" id="statBunked">0</p></div>
-                <div><p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Valid</p><p class="text-xl font-bold text-slate-700" id="statTotal">0</p></div>
+            <!-- Controls -->
+            <div class="flex gap-4 w-full max-w-xs">
+                <button id="btnStartTimer" onclick="window.toggleTimer()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-2xl shadow-md shadow-brand-500/30 transition text-lg">
+                    Start
+                </button>
+                <button onclick="window.resetTimer()" class="w-16 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <!-- Settings -->
+            <div class="flex gap-3 mt-6">
+                <button onclick="window.setTimerMode('pomodoro')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow-sm focus-mode-btn" id="btnModePomodoro">25 min</button>
+                <button onclick="window.setTimerMode('shortBreak')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeShort">5 min</button>
+                <button onclick="window.setTimerMode('longBreak')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 focus-mode-btn" id="btnModeLong">15 min</button>
             </div>
         </div>
     </main>
 
+    <!-- ================= PAGE 3: MODERN ANALYSIS ================= -->
+    <main id="page-analysis" class="page-content hidden space-y-4 pt-2">
+        <header class="mb-4">
+            <h2 class="text-2xl font-extrabold text-slate-800">Dashboard</h2>
+            <p class="text-xs text-slate-500 font-medium">Your progress and analytics</p>
+        </header>
+
+        <!-- Focus Stats Card -->
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <h3 class="text-slate-300 text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-stopwatch"></i> Focus Time</h3>
+            <div class="flex items-end gap-2 mb-1">
+                <span id="statTotalFocus" class="text-5xl font-extrabold tracking-tight">0</span>
+                <span class="text-slate-400 mb-1 font-medium">total minutes</span>
+            </div>
+            <p class="text-sm text-brand-300 font-medium mt-2" id="statTodayFocusDesc">0 mins focused today</p>
+            <i class="fa-solid fa-brain absolute -right-6 -bottom-6 text-8xl text-white opacity-5"></i>
+        </div>
+
+        <!-- Attendance Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-graduation-cap"></i> College Attendance</h3>
+                <span id="attPercentText" class="text-2xl font-extrabold text-emerald-500">0%</span>
+            </div>
+            
+            <div class="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">
+                <div id="attProgressBar" class="bg-emerald-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 text-center mt-2">
+                <div class="bg-slate-50 p-3 rounded-xl">
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Attended</p>
+                    <p class="text-lg font-bold text-slate-700" id="statAtt">0</p>
+                </div>
+                <div class="bg-red-50 p-3 rounded-xl">
+                    <p class="text-[10px] uppercase font-bold text-red-400">Bunked</p>
+                    <p class="text-lg font-bold text-red-600" id="statBnk">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Overview -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-4">
+                <div class="bg-blue-50 w-10 h-10 rounded-full flex items-center justify-center text-blue-500"><i class="fa-solid fa-file-pdf"></i></div>
+                <div>
+                    <p class="text-xl font-extrabold text-slate-800" id="statPdfCount">0</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Saved PDFs</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex items-center gap-4">
+                <div class="bg-purple-50 w-10 h-10 rounded-full flex items-center justify-center text-purple-500"><i class="fa-solid fa-bookmark"></i></div>
+                <div>
+                    <p class="text-xl font-extrabold text-slate-800" id="statNoteCount">0</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Total Notes</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= PAGE 4: CALENDAR ================= -->
     <main id="page-calendar" class="page-content hidden space-y-6 pt-2">
         <header class="flex justify-between items-center mb-2">
             <h2 class="text-2xl font-extrabold text-slate-800">Calendar</h2>
@@ -154,75 +215,59 @@
         </div>
     </main>
 
+    <!-- ================= PAGE 5: PROFILE ================= -->
     <main id="page-profile" class="page-content hidden space-y-6 pt-2">
         <header class="mb-6"><h2 class="text-2xl font-extrabold text-slate-800">Profile & Account</h2></header>
         
+        <!-- Logged IN View -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center relative overflow-hidden">
+            <div class="w-20 h-20 bg-brand-100 rounded-full border-4 border-white shadow-md overflow-hidden mb-3 flex items-center justify-center">
+                <i class="fa-solid fa-user text-3xl text-brand-600"></i>
+            </div>
+            <h3 class="font-bold text-xl text-slate-800 mb-0.5">Scholar</h3>
+            <p id="userEmail" class="text-slate-500 text-sm mb-4">user@email.com</p>
             
-            <div id="authLoggedOut" class="flex flex-col items-center w-full">
-                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
-                    <i class="fa-solid fa-cloud text-2xl text-slate-400"></i>
-                </div>
-                <h3 class="font-bold text-lg text-slate-800 mb-1">Sign In to Sync</h3>
-                <p class="text-slate-500 text-xs mb-4">Create an account or login to back up your schedule securely.</p>
-                
-                <input type="email" id="emailInput" placeholder="Email Address" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 outline-none text-sm focus:border-brand-500">
-                <input type="password" id="passwordInput" placeholder="Password (Min 6 characters)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 outline-none text-sm focus:border-brand-500">
-                
-                <div class="flex gap-2 w-full mt-2">
-                    <button id="registerBtn" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-slate-200 transition">Register</button>
-                    <button id="loginBtn" class="flex-1 bg-brand-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-brand-700 transition">Login</button>
-                </div>
+            <div class="bg-emerald-50 text-emerald-700 text-xs font-bold px-4 py-2 rounded-full mb-6 flex items-center gap-1.5 border border-emerald-100">
+                <i class="fa-solid fa-cloud-check"></i> Cloud Sync Active
             </div>
-
-            <div id="authLoggedIn" class="hidden flex flex-col items-center w-full">
-                <div class="w-20 h-20 bg-brand-100 rounded-full border-4 border-white shadow-md overflow-hidden mb-3 flex items-center justify-center">
-                    <i class="fa-solid fa-user text-3xl text-brand-600"></i>
-                </div>
-                <h3 class="font-bold text-xl text-slate-800 mb-0.5">Prashant</h3>
-                <p id="userEmail" class="text-slate-500 text-sm mb-4">user@email.com</p>
-                
-                <div class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full mb-5 flex items-center gap-1.5">
-                    <i class="fa-solid fa-check-circle"></i> Cloud Sync Active
-                </div>
-                
-                <button id="signOutBtn" class="w-full bg-slate-100 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-200 transition">
-                    Sign Out
-                </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <h3 class="font-bold text-xs uppercase text-slate-400 p-4 pb-2">Offline Data Management</h3>
-            <div class="divide-y divide-slate-100">
-                <button onclick="window.exportData()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
-                    <div class="flex items-center gap-3 text-slate-700 font-medium"><i class="fa-solid fa-download w-5 text-blue-500 text-center"></i> Backup to Phone File</div>
-                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
-                </button>
-                <button onclick="document.getElementById('importFile').click()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
-                    <div class="flex items-center gap-3 text-slate-700 font-medium"><i class="fa-solid fa-upload w-5 text-emerald-500 text-center"></i> Restore from File</div>
-                    <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
-                </button>
-                <button onclick="window.clearAllData()" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition text-left">
-                    <div class="flex items-center gap-3 text-red-600 font-medium"><i class="fa-solid fa-trash-can w-5 text-center"></i> Erase All Data</div>
-                </button>
-            </div>
-            <input type="file" id="importFile" accept=".json" class="hidden" onchange="window.importData(event)">
+            
+            <button id="signOutBtn" class="w-full bg-slate-100 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-red-50 hover:text-red-600 transition">
+                Sign Out
+            </button>
         </div>
     </main>
-
 </div>
 
-<nav class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
+<!-- ================= LOGIN SCREEN (Shown when logged out) ================= -->
+<div id="authScreen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-50">
+    <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg shadow-brand-500/40 mb-6">
+        <i class="fa-solid fa-graduation-cap"></i>
+    </div>
+    <h1 class="text-3xl font-extrabold text-slate-800 mb-2 text-center">TrackerPro</h1>
+    <p class="text-slate-500 text-center mb-8 text-sm max-w-xs">Sign in to securely sync your schedule, notes, and focus time to the cloud.</p>
+    
+    <div class="w-full max-w-sm bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <input type="email" id="emailInput" placeholder="Email Address" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-4 outline-none focus:border-brand-500 font-medium">
+        <input type="password" id="passwordInput" placeholder="Password (Min 6 chars)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl mb-6 outline-none focus:border-brand-500 font-medium">
+        
+        <button id="loginBtn" class="w-full bg-brand-600 text-white font-bold py-4 px-4 rounded-xl shadow-md shadow-brand-500/30 hover:bg-brand-700 transition mb-3">Login</button>
+        <button id="registerBtn" class="w-full bg-slate-100 text-slate-700 font-bold py-4 px-4 rounded-xl hover:bg-slate-200 transition">Create Account</button>
+    </div>
+</div>
+
+<!-- ================= BOTTOM NAVIGATION ================= -->
+<nav id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
     <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
         <button onclick="window.switchTab('home')" id="nav-home" class="nav-btn text-brand-600 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-house text-xl mb-0.5"></i><span class="text-[10px] font-bold">Home</span></button>
-        <button onclick="window.switchTab('schedule')" id="nav-schedule" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-layer-group text-xl mb-0.5"></i><span class="text-[10px] font-bold">Classes</span></button>
+        <button onclick="window.switchTab('focus')" id="nav-focus" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-stopwatch text-xl mb-0.5"></i><span class="text-[10px] font-bold">Focus</span></button>
         <button onclick="window.switchTab('analysis')" id="nav-analysis" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-chart-pie text-xl mb-0.5"></i><span class="text-[10px] font-bold">Analysis</span></button>
         <button onclick="window.switchTab('calendar')" id="nav-calendar" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-regular fa-calendar text-xl mb-0.5"></i><span class="text-[10px] font-bold">Calendar</span></button>
         <button onclick="window.switchTab('profile')" id="nav-profile" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-user text-xl mb-0.5"></i><span class="text-[10px] font-bold">Profile</span></button>
     </div>
 </nav>
 
+<!-- ================= MODALS (Add Class, PDF, Notes, Holidays) ================= -->
+<!-- ADD CLASS MODAL -->
 <div id="classModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -252,11 +297,9 @@
                         <button type="button" onclick="window.addNewType()" class="bg-brand-50 border border-brand-200 text-brand-600 px-4 rounded-xl font-bold"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
-                
                 <div class="border border-slate-200 rounded-xl p-4 bg-slate-50">
                     <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-slate-700 mb-3">
-                        <input type="checkbox" id="isRepeat" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" onchange="document.getElementById('repeatDays').classList.toggle('hidden', !this.checked)"> 
-                        Repeat Weekly (Next 8 Weeks)
+                        <input type="checkbox" id="isRepeat" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500" onchange="document.getElementById('repeatDays').classList.toggle('hidden', !this.checked)"> Repeat Weekly (Next 8 Weeks)
                     </label>
                     <div id="repeatDays" class="hidden flex justify-between gap-1">
                         <label class="day-label cursor-pointer text-center"><input type="checkbox" value="1" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">M</div></label>
@@ -268,13 +311,13 @@
                         <label class="day-label cursor-pointer text-center"><input type="checkbox" value="0" class="hidden"><div class="w-10 h-10 rounded-full border border-slate-300 bg-white flex items-center justify-center text-sm font-bold text-slate-500 transition">S</div></label>
                     </div>
                 </div>
-
                 <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md mt-2 transition">Save Class</button>
             </form>
         </div>
     </div>
 </div>
 
+<!-- PDF BANK MODAL -->
 <div id="pdfBankModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-blue-50">
@@ -305,6 +348,7 @@
     </div>
 </div>
 
+<!-- NOTES MODAL -->
 <div id="notesModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-purple-50">
@@ -335,6 +379,7 @@
     </div>
 </div>
 
+<!-- ADD HOLIDAY MODAL -->
 <div id="holidayModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
         <h3 class="font-bold text-lg mb-4 text-slate-800">Add Global Holiday</h3>
@@ -347,11 +392,13 @@
     </div>
 </div>
 
+<!-- FIREBASE CLOUD & AUTHENTICATION SCRIPT -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
+    // YOUR KEYS
     const firebaseConfig = {
         apiKey: "AIzaSyDQmE65lN8guR6oH2lKUe1jE1932HIAmmc",
         authDomain: "tracker-pro-6e84f.firebaseapp.com",
@@ -364,118 +411,127 @@
     const btnLogin = document.getElementById('loginBtn');
     const btnRegister = document.getElementById('registerBtn');
     const btnSignOut = document.getElementById('signOutBtn');
-    const authLoggedOut = document.getElementById('authLoggedOut');
-    const authLoggedIn = document.getElementById('authLoggedIn');
-    const emailInput = document.getElementById('emailInput');
-    const passwordInput = document.getElementById('passwordInput');
+    const authScreen = document.getElementById('authScreen');
+    const appContainer = document.getElementById('appContainer');
+    const bottomNav = document.getElementById('bottomNav');
 
     try {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Intercept local save to sync to cloud
-        const originalSave = window.saveAllData;
-        window.saveAllData = async function(skipCloud = false) {
-            if(originalSave) originalSave();
-            if(!skipCloud && window.cloudUserUid && window.cloudDb && window.appState) {
-                try {
-                    await setDoc(doc(window.cloudDb, "users", window.cloudUserUid), {
-                        classes: window.appState.classes, pdfs: window.appState.pdfs,
-                        notes: window.appState.notes, customTypes: window.appState.customTypes,
-                        folders: window.appState.folders, holidays: window.appState.holidays
-                    });
-                } catch(e) { console.error("Cloud save failed:", e); }
-            }
+        // Core Cloud Save Function (No Local Storage)
+        window.saveDataToCloud = async function() {
+            if(!window.cloudUserUid) return;
+            try {
+                await setDoc(doc(db, "users", window.cloudUserUid), {
+                    classes: window.appState.classes, pdfs: window.appState.pdfs,
+                    notes: window.appState.notes, customTypes: window.appState.customTypes,
+                    folders: window.appState.folders, holidays: window.appState.holidays,
+                    focusStats: window.appState.focusStats
+                });
+                window.updateUI();
+            } catch(e) { console.error("Cloud save failed:", e); }
         };
 
         // Login Action
         btnLogin.addEventListener('click', () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
             if (!email || !password) return alert("Please enter email and password.");
             
+            btnLogin.innerText = "Loading...";
             signInWithEmailAndPassword(auth, email, password).catch(error => {
+                btnLogin.innerText = "Login";
                 alert("Login Failed: " + error.message);
             });
         });
 
         // Register Action
         btnRegister.addEventListener('click', () => {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            if (!email || password.length < 6) return alert("Please enter a valid email and a password with at least 6 characters.");
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            if (!email || password.length < 6) return alert("Valid email & min 6 char password required.");
             
+            btnRegister.innerText = "Loading...";
             createUserWithEmailAndPassword(auth, email, password).catch(error => {
+                btnRegister.innerText = "Create Account";
                 alert("Registration Failed: " + error.message);
             });
         });
 
         // Sign Out Action
-        btnSignOut.addEventListener('click', () => signOut(auth));
+        btnSignOut.addEventListener('click', () => {
+            if(confirm("Sign out? Your data will remain safe in the cloud.")) {
+                signOut(auth);
+            }
+        });
 
         // State Change Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                authLoggedOut.classList.add('hidden');
-                authLoggedIn.classList.remove('hidden');
-                authLoggedIn.classList.add('flex');
-                
+                // UI Switch to App
+                authScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                bottomNav.classList.remove('hidden');
                 document.getElementById('userEmail').innerText = user.email;
+                document.getElementById('greetingName').innerText = "Hi, " + user.email.split('@')[0] + " 👋";
                 
                 window.cloudUserUid = user.uid;
-                window.cloudDb = db;
                 
-                // Fetch data from Cloud
+                // Fetch user specific data from Cloud
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists() && window.appState) {
+                    if (docSnap.exists()) {
                         const d = docSnap.data();
-                        if(d.classes) window.appState.classes = d.classes;
-                        if(d.pdfs) window.appState.pdfs = d.pdfs;
-                        if(d.notes) window.appState.notes = d.notes;
-                        if(d.customTypes) window.appState.customTypes = d.customTypes;
-                        if(d.folders) window.appState.folders = d.folders;
-                        if(d.holidays) window.appState.holidays = d.holidays;
-                        
-                        window.saveAllData(true); 
-                        window.renderTypeDropdowns();
-                        window.renderFolderTabs('pdf'); window.renderFolderTabs('note');
+                        window.appState.classes = d.classes || [];
+                        window.appState.pdfs = d.pdfs || [];
+                        window.appState.notes = d.notes || [];
+                        window.appState.customTypes = d.customTypes || ['College', 'Batch', 'Other'];
+                        window.appState.folders = d.folders || { pdf: ['General'], note: ['General'] };
+                        window.appState.holidays = d.holidays || [];
+                        window.appState.focusStats = d.focusStats || {};
                     } else {
-                        window.saveAllData(); // Push local data up
+                        // Brand new user, set defaults
+                        window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = []; window.appState.holidays = []; window.appState.focusStats = {};
+                        window.appState.customTypes = ['College', 'Batch', 'Other']; window.appState.folders = { pdf: ['General'], note: ['General'] };
+                        window.saveDataToCloud(); 
                     }
+                    window.updateUI();
+                    window.renderTypeDropdowns();
+                    window.renderFolderTabs('pdf'); window.renderFolderTabs('note');
+                    window.switchTab('home'); // Go home on login
+                    
                 } catch(e) { console.error(e); }
                 
             } else {
+                // Wipe Local Memory for Security
                 window.cloudUserUid = null;
-                authLoggedOut.classList.remove('hidden');
-                authLoggedOut.classList.add('flex');
-                authLoggedIn.classList.add('hidden');
+                window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = [];
+                
+                // UI Switch to Login
+                authScreen.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                bottomNav.classList.add('hidden');
+                btnLogin.innerText = "Login";
+                btnRegister.innerText = "Create Account";
             }
         });
     } catch (e) { console.error(e); }
 </script>
 
+<!-- STANDARD APP LOGIC -->
 <script>
-    let classes = JSON.parse(localStorage.getItem('pw_classes_v2')) || [];
-    let pdfs = JSON.parse(localStorage.getItem('pw_pdfs_v2')) || [];
-    let notes = JSON.parse(localStorage.getItem('pw_notes_v2')) || [];
-    let customTypes = JSON.parse(localStorage.getItem('pw_types_v2')) || ['College', 'Batch', 'Other'];
-    let folders = JSON.parse(localStorage.getItem('pw_folders_v2')) || { pdf: ['General'], note: ['General'] };
-    let holidays = JSON.parse(localStorage.getItem('pw_holidays_v2')) || [];
-    
+    // In-memory state only (NO LOCAL STORAGE)
     window.appState = {
-        get classes() { return classes; }, set classes(v) { classes = v; },
-        get pdfs() { return pdfs; }, set pdfs(v) { pdfs = v; },
-        get notes() { return notes; }, set notes(v) { notes = v; },
-        get customTypes() { return customTypes; }, set customTypes(v) { customTypes = v; },
-        get folders() { return folders; }, set folders(v) { folders = v; },
-        get holidays() { return holidays; }, set holidays(v) { holidays = v; }
+        classes: [], pdfs: [], notes: [], customTypes: ['College', 'Batch', 'Other'],
+        folders: { pdf: ['General'], note: ['General'] }, holidays: [], focusStats: {}
     };
     
     let activePdfFolder = 'General'; let activeNoteFolder = 'General';
     let currentMonth = new Date().getMonth(); let currentYear = new Date().getFullYear();
 
+    // Date calculations
     const todayObj = new Date();
     const offset = todayObj.getTimezoneOffset();
     const todayLocal = new Date(todayObj.getTime() - (offset*60*1000));
@@ -488,14 +544,22 @@
     const quotes = ["Push yourself, because no one else is going to do it for you.", "Sometimes later becomes never. Do it now.", "Great things never come from comfort zones.", "Success doesn't just find you. You have to go out and get it.", "The harder you work for something, the greater you'll feel."];
     document.getElementById('dailyQuote').innerText = `"${quotes[todayObj.getDay() % quotes.length]}"`;
 
+    // Navigation
     window.switchTab = function(tabId) {
         document.querySelectorAll('.page-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('block'); });
         document.getElementById(`page-${tabId}`).classList.remove('hidden'); document.getElementById(`page-${tabId}`).classList.add('block');
         document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-brand-600'); b.classList.add('text-slate-400'); });
         document.getElementById(`nav-${tabId}`).classList.remove('text-slate-400'); document.getElementById(`nav-${tabId}`).classList.add('text-brand-600');
         window.scrollTo(0, 0);
-        if(tabId === 'calendar') window.renderCalendar();
+        
+        // Tab Specific Actions
+        if(tabId === 'calendar') {
+            window.renderCalendar();
+            // Automatically select today's date when opening calendar
+            window.selectCalendarDate(currentDateString);
+        }
         if(tabId === 'analysis') window.renderAnalysis();
+        if(tabId === 'focus') window.updateFocusUI();
     }
 
     window.openModal = function(id) { const m = document.getElementById(id); m.classList.remove('hidden'); m.firstElementChild.classList.remove('modal-exit'); m.firstElementChild.classList.add('modal-enter'); }
@@ -504,17 +568,16 @@
     function isCollegeType(type) { const t = type.toLowerCase(); return t.includes('college') || t.includes('bsc') || t.includes('bed') || t.includes('university'); }
     function formatTime(tStr) { if (!tStr) return ''; const [h, m] = tStr.split(':'); let hr = parseInt(h); const ampm = hr >= 12 ? 'PM' : 'AM'; return `${hr % 12 || 12}:${m} ${ampm}`; }
 
-    function renderTypeDropdowns() {
-        const html = customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+    // Classes & Types
+    window.renderTypeDropdowns = function() {
+        const html = window.appState.customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
         document.getElementById('type').innerHTML = html;
-        document.getElementById('homeTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
-        document.getElementById('analysisTypeFilter').innerHTML = '<option value="All">All Types</option>' + html;
     }
 
     window.addNewType = function() {
         const newType = prompt("New Class Type (e.g. BSc, Tuition):");
-        if (newType && newType.trim() && !customTypes.includes(newType.trim())) {
-            customTypes.push(newType.trim()); renderTypeDropdowns(); document.getElementById('type').value = newType.trim(); window.saveAllData();
+        if (newType && newType.trim() && !window.appState.customTypes.includes(newType.trim())) {
+            window.appState.customTypes.push(newType.trim()); window.renderTypeDropdowns(); document.getElementById('type').value = newType.trim(); window.saveDataToCloud();
         }
     }
 
@@ -530,8 +593,8 @@
 
         if (!isRepeat || selectedDays.length === 0) {
             let stat = 'Pending';
-            if (isColl && holidays.some(h => h.date === startDateStr)) stat = 'Holiday';
-            classes.push({ id: Date.now().toString(), name: baseName, date: startDateStr, time: timeStr, type: typeStr, status: stat });
+            if (isColl && window.appState.holidays.some(h => h.date === startDateStr)) stat = 'Holiday';
+            window.appState.classes.push({ id: Date.now().toString(), name: baseName, date: startDateStr, time: timeStr, type: typeStr, status: stat });
         } else {
             const startD = new Date(startDateStr);
             for(let i=0; i<56; i++) {
@@ -539,12 +602,12 @@
                 if (selectedDays.includes(loopD.getDay())) {
                     const localLoopDateStr = loopD.toISOString().split('T')[0];
                     let stat = 'Pending';
-                    if (isColl && holidays.some(h => h.date === localLoopDateStr)) stat = 'Holiday';
-                    classes.push({ id: Date.now().toString() + i, name: baseName, date: localLoopDateStr, time: timeStr, type: typeStr, status: stat });
+                    if (isColl && window.appState.holidays.some(h => h.date === localLoopDateStr)) stat = 'Holiday';
+                    window.appState.classes.push({ id: Date.now().toString() + i, name: baseName, date: localLoopDateStr, time: timeStr, type: typeStr, status: stat });
                 }
             }
         }
-        window.saveAllData(); document.getElementById('trackerForm').reset(); document.getElementById('repeatDays').classList.add('hidden'); window.closeModal('classModal');
+        window.saveDataToCloud(); document.getElementById('trackerForm').reset(); document.getElementById('repeatDays').classList.add('hidden'); window.closeModal('classModal');
     });
 
     function renderClassCard(cls) {
@@ -565,54 +628,52 @@
     }
 
     window.displayHomeClasses = function() {
-        const filter = document.getElementById('homeTypeFilter').value;
-        let todays = classes.filter(c => c.date === currentDateString);
+        let filterEle = document.getElementById('homeTypeFilter');
+        if(!filterEle) return;
+        const filter = filterEle.value || "All";
+        let todays = window.appState.classes.filter(c => c.date === currentDateString);
         if (filter !== 'All') todays = todays.filter(c => c.type === filter);
         todays.sort((a,b) => (a.time||"24:00").localeCompare(b.time||"24:00"));
-        document.getElementById('homeClassesList').innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-medium text-sm">No classes match this filter today.</p></div>`;
+        document.getElementById('homeClassesList').innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-8 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-medium text-sm">No classes for today.</p></div>`;
     }
 
-    window.displayAllClasses = function() {
-        document.getElementById('classCount').innerText = classes.length;
-        if(classes.length === 0) {
-            document.getElementById('emptyState').classList.remove('hidden'); document.getElementById('emptyState').classList.add('flex');
-            document.getElementById('allClassesList').innerHTML = ''; return;
-        }
-        document.getElementById('emptyState').classList.add('hidden'); document.getElementById('emptyState').classList.remove('flex');
-        const sorted = [...classes].sort((a,b) => new Date(b.date) - new Date(a.date));
-        document.getElementById('allClassesList').innerHTML = sorted.map(renderClassCard).join('');
+    window.updateStatus = function(id, st) { const c = window.appState.classes.find(x => x.id === id); if(c) { c.status = st; window.saveDataToCloud(); } }
+    window.deleteClass = function(id) { if(confirm("Delete this class?")) { window.appState.classes = window.appState.classes.filter(x => x.id !== id); window.saveDataToCloud(); } }
+
+    window.updateUI = function() {
+        window.displayHomeClasses();
+        if(!document.getElementById('page-analysis').classList.contains('hidden')) window.renderAnalysis();
+        window.updateFocusUI();
     }
 
-    window.updateStatus = function(id, st) { const c = classes.find(x => x.id === id); if(c) { c.status = st; window.saveAllData(); } }
-    window.deleteClass = function(id) { if(confirm("Delete this class?")) { classes = classes.filter(x => x.id !== id); window.saveAllData(); } }
-
-    function renderFolderTabs(type) {
+    // Folders
+    window.renderFolderTabs = function(type) {
         const listId = type === 'pdf' ? 'pdfFoldersList' : 'noteFoldersList';
         const activeF = type === 'pdf' ? activePdfFolder : activeNoteFolder;
-        document.getElementById(listId).innerHTML = folders[type].map(f => `<button onclick="window.setActiveFolder('${type}', '${f}')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition ${f === activeF ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">${f}</button>`).join('');
-        document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').innerHTML = folders[type].map(f => `<option value="${f}">${f}</option>`).join('');
+        document.getElementById(listId).innerHTML = window.appState.folders[type].map(f => `<button onclick="window.setActiveFolder('${type}', '${f}')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition ${f === activeF ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">${f}</button>`).join('');
+        document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').innerHTML = window.appState.folders[type].map(f => `<option value="${f}">${f}</option>`).join('');
     }
 
-    window.setActiveFolder = function(type, f) { if(type === 'pdf') { activePdfFolder = f; window.renderPdfs(); } else { activeNoteFolder = f; window.renderNotes(); } renderFolderTabs(type); }
-    window.addFolder = function(type) { const n = prompt("New Folder Name:"); if(n && n.trim() && !folders[type].includes(n.trim())) { folders[type].push(n.trim()); window.saveAllData(); renderFolderTabs(type); document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').value = n.trim(); } }
+    window.setActiveFolder = function(type, f) { if(type === 'pdf') { activePdfFolder = f; window.renderPdfs(); } else { activeNoteFolder = f; window.renderNotes(); } window.renderFolderTabs(type); }
+    window.addFolder = function(type) { const n = prompt("New Folder Name:"); if(n && n.trim() && !window.appState.folders[type].includes(n.trim())) { window.appState.folders[type].push(n.trim()); window.saveDataToCloud(); window.renderFolderTabs(type); document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').value = n.trim(); } }
 
     window.renderPdfs = function() {
-        const filtered = pdfs.filter(p => p.folder === activePdfFolder);
+        const filtered = window.appState.pdfs.filter(p => p.folder === activePdfFolder);
         if(filtered.length === 0) { document.getElementById('pdfList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
         document.getElementById('pdfList').innerHTML = filtered.map(p => `<div class="bg-white p-3.5 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm"><div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-50 text-blue-500 w-10 h-10 rounded-lg flex items-center justify-center shrink-0"><i class="fa-regular fa-file-pdf"></i></div><div class="truncate"><h5 class="font-bold text-sm text-slate-800 truncate">${p.title}</h5><a href="${p.url}" target="_blank" class="text-[10px] font-bold text-blue-500 hover:underline uppercase tracking-wide">Open Link <i class="fa-solid fa-arrow-up-right-from-square ml-0.5"></i></a></div></div><button onclick="window.deletePdf('${p.id}')" class="text-slate-300 hover:text-red-500 px-2 shrink-0"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`).join('');
     }
-    window.addPdf = function() { const title = document.getElementById('pdfTitle').value.trim(); const url = document.getElementById('pdfUrl').value.trim(); const fld = document.getElementById('pdfFolderSelect').value; if(title && url) { pdfs.push({ id: Date.now().toString(), title, url, folder: fld }); window.saveAllData(); document.getElementById('pdfTitle').value = ''; document.getElementById('pdfUrl').value = ''; window.closeModal('addPdfModal'); window.setActiveFolder('pdf', fld); } }
-    window.deletePdf = function(id) { pdfs = pdfs.filter(p => p.id !== id); window.saveAllData(); window.renderPdfs(); }
+    window.addPdf = function() { const title = document.getElementById('pdfTitle').value.trim(); const url = document.getElementById('pdfUrl').value.trim(); const fld = document.getElementById('pdfFolderSelect').value; if(title && url) { window.appState.pdfs.push({ id: Date.now().toString(), title, url, folder: fld }); window.saveDataToCloud(); document.getElementById('pdfTitle').value = ''; document.getElementById('pdfUrl').value = ''; window.closeModal('addPdfModal'); window.setActiveFolder('pdf', fld); } }
+    window.deletePdf = function(id) { window.appState.pdfs = window.appState.pdfs.filter(p => p.id !== id); window.saveDataToCloud(); window.renderPdfs(); }
 
     window.renderNotes = function() {
-        const filtered = notes.filter(n => n.folder === activeNoteFolder);
+        const filtered = window.appState.notes.filter(n => n.folder === activeNoteFolder);
         if(filtered.length === 0) { document.getElementById('notesList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
         document.getElementById('notesList').innerHTML = filtered.map(n => `<div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 shadow-sm relative pr-8"><h5 class="font-bold text-sm text-purple-900 mb-1">${n.title}</h5><p class="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">${n.content}</p><span class="text-[9px] font-bold text-purple-400/80 uppercase tracking-widest block mt-3">${n.date}</span><button onclick="window.deleteNote('${n.id}')" class="absolute top-3 right-3 text-purple-300 hover:text-red-500 w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`).join('');
     }
-    window.addNote = function() { const title = document.getElementById('noteTitle').value.trim(); const content = document.getElementById('noteContent').value.trim(); const fld = document.getElementById('noteFolderSelect').value; if(title || content) { notes.push({ id: Date.now().toString(), title: title || 'Untitled', content, date: currentDateString, folder: fld }); window.saveAllData(); document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; window.closeModal('addNoteModal'); window.setActiveFolder('note', fld); } }
-    window.deleteNote = function(id) { notes = notes.filter(n => n.id !== id); window.saveAllData(); window.renderNotes(); }
+    window.addNote = function() { const title = document.getElementById('noteTitle').value.trim(); const content = document.getElementById('noteContent').value.trim(); const fld = document.getElementById('noteFolderSelect').value; if(title || content) { window.appState.notes.push({ id: Date.now().toString(), title: title || 'Untitled', content, date: currentDateString, folder: fld }); window.saveDataToCloud(); document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; window.closeModal('addNoteModal'); window.setActiveFolder('note', fld); } }
+    window.deleteNote = function(id) { window.appState.notes = window.appState.notes.filter(n => n.id !== id); window.saveDataToCloud(); window.renderNotes(); }
 
-    window.addGlobalHoliday = function() { const title = document.getElementById('holTitle').value.trim(); const date = document.getElementById('holDate').value; if(title && date) { holidays.push({ date, title }); classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; }); window.saveAllData(); document.getElementById('holTitle').value = ''; window.closeModal('holidayModal'); } }
+    window.addGlobalHoliday = function() { const title = document.getElementById('holTitle').value.trim(); const date = document.getElementById('holDate').value; if(title && date) { window.appState.holidays.push({ date, title }); window.appState.classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; }); window.saveDataToCloud(); document.getElementById('holTitle').value = ''; window.closeModal('holidayModal'); } }
 
     window.changeMonth = function(dir) { currentMonth += dir; if(currentMonth > 11) { currentMonth = 0; currentYear++; } else if(currentMonth < 0) { currentMonth = 11; currentYear--; } window.renderCalendar(); }
     window.renderCalendar = function() {
@@ -622,7 +683,7 @@
         let gridHtml = ''; for(let i = 0; i < firstDay; i++) gridHtml += `<div></div>`;
         for(let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const dayClasses = classes.filter(c => c.date === dateStr); const dayHols = holidays.filter(h => h.date === dateStr); const dayNotes = notes.filter(n => n.date === dateStr);
+            const dayClasses = window.appState.classes.filter(c => c.date === dateStr); const dayHols = window.appState.holidays.filter(h => h.date === dateStr); const dayNotes = window.appState.notes.filter(n => n.date === dateStr);
             let indicators = '';
             if(dayHols.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>`;
             else if(dayClasses.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-brand-500"></div>`;
@@ -630,12 +691,12 @@
             const isToday = dateStr === currentDateString; const bgClass = isToday ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-100';
             gridHtml += `<div onclick="window.selectCalendarDate('${dateStr}')" class="p-2 rounded-xl cursor-pointer flex flex-col items-center justify-center min-h-[44px] ${bgClass} transition"><span class="text-sm ${isToday ? 'font-bold' : ''}">${d}</span><div class="flex gap-0.5 mt-0.5 h-1.5">${indicators}</div></div>`;
         }
-        document.getElementById('calendarGrid').innerHTML = gridHtml; document.getElementById('calendarDayDetails').classList.add('hidden');
+        document.getElementById('calendarGrid').innerHTML = gridHtml;
     }
 
     window.selectCalendarDate = function(dateStr) {
         const dObj = new Date(dateStr); document.getElementById('selectedDateTitle').innerText = dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-        const dayClasses = classes.filter(c => c.date === dateStr); const dayHols = holidays.filter(h => h.date === dateStr); const dayNotes = notes.filter(n => n.date === dateStr);
+        const dayClasses = window.appState.classes.filter(c => c.date === dateStr); const dayHols = window.appState.holidays.filter(h => h.date === dateStr); const dayNotes = window.appState.notes.filter(n => n.date === dateStr);
         let html = '';
         if(dayHols.length > 0) dayHols.forEach(h => html += `<div class="bg-yellow-50 text-yellow-800 p-2 rounded-lg border border-yellow-200 text-xs font-bold uppercase tracking-wide mb-2"><i class="fa-solid fa-star text-yellow-500 mr-1"></i> Holiday: ${h.title}</div>`);
         if(dayClasses.length === 0 && dayNotes.length === 0 && dayHols.length === 0) { html += '<p class="text-slate-400 italic">Nothing scheduled.</p>'; } 
@@ -655,52 +716,121 @@
         document.getElementById('selectedDateContent').innerHTML = html; document.getElementById('calendarDayDetails').classList.remove('hidden');
     }
 
+    // Modern Analysis
     window.renderAnalysis = function() {
-        const filter = document.getElementById('analysisTypeFilter').value;
-        let valid = (filter === 'All' ? classes : classes.filter(c => c.type === filter)).filter(c => c.status !== 'Pending' && c.status !== 'Holiday');
-        let att = valid.filter(c => c.status === 'Attended' || c.status === 'Done').length;
-        let bnked = valid.filter(c => c.status === 'Bunked').length;
-        let total = att + bnked; let pct = total > 0 ? Math.round((att / total) * 100) : 0;
+        // Attendance logic
+        let collegeCls = window.appState.classes.filter(c => isCollegeType(c.type) && c.status !== 'Pending' && c.status !== 'Holiday');
+        let att = collegeCls.filter(c => c.status === 'Attended' || c.status === 'Done').length;
+        let bnked = collegeCls.filter(c => c.status === 'Bunked').length;
+        let total = att + bnked; 
+        let pct = total > 0 ? Math.round((att / total) * 100) : 0;
 
-        document.getElementById('statAttended').innerText = att; document.getElementById('statBunked').innerText = bnked; document.getElementById('statTotal').innerText = total;
-        document.getElementById('attendanceText').innerText = pct + '%'; document.getElementById('attendanceCircle').setAttribute('stroke-dasharray', `${pct}, 100`);
-        const circle = document.getElementById('attendanceCircle'); circle.classList.remove('stroke-brand-500', 'stroke-emerald-500', 'stroke-red-500', 'stroke-yellow-500');
-        if(pct >= 75) circle.classList.add('stroke-emerald-500'); else if (pct >= 50) circle.classList.add('stroke-yellow-500'); else if (total > 0) circle.classList.add('stroke-red-500'); else circle.classList.add('stroke-brand-500');
-        document.getElementById('analysisTitle').innerText = filter === 'All' ? 'Overall Attendance' : `${filter} Attendance`;
+        document.getElementById('statAtt').innerText = att; 
+        document.getElementById('statBnk').innerText = bnked; 
+        document.getElementById('attPercentText').innerText = pct + '%';
+        document.getElementById('attProgressBar').style.width = pct + '%';
+        
+        // Progress bar color logic
+        const bar = document.getElementById('attProgressBar');
+        bar.className = 'h-3 rounded-full transition-all duration-1000 ' + (pct >= 75 ? 'bg-emerald-500' : (pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'));
+
+        // Focus & Overview logic
+        let totalFocusAllTime = Object.values(window.appState.focusStats).reduce((a, b) => a + b, 0);
+        let focusToday = window.appState.focusStats[currentDateString] || 0;
+        
+        document.getElementById('statTotalFocus').innerText = totalFocusAllTime;
+        document.getElementById('statTodayFocusDesc').innerText = `${focusToday} mins focused today`;
+
+        document.getElementById('statPdfCount').innerText = window.appState.pdfs.length;
+        document.getElementById('statNoteCount').innerText = window.appState.notes.length;
     }
 
-    window.saveAllData = function(skipCloud = false) {
-        localStorage.setItem('pw_classes_v2', JSON.stringify(classes)); localStorage.setItem('pw_pdfs_v2', JSON.stringify(pdfs)); localStorage.setItem('pw_notes_v2', JSON.stringify(notes)); localStorage.setItem('pw_types_v2', JSON.stringify(customTypes)); localStorage.setItem('pw_folders_v2', JSON.stringify(folders)); localStorage.setItem('pw_holidays_v2', JSON.stringify(holidays));
-        window.displayHomeClasses(); window.displayAllClasses(); if(!document.getElementById('page-analysis').classList.contains('hidden')) window.renderAnalysis();
+    // Focus Timer Logic
+    let focusTimerInterval;
+    let focusTimeLeft = 25 * 60;
+    let focusTotalDuration = 25 * 60;
+    let isFocusRunning = false;
+
+    window.updateFocusUI = function() {
+        const mins = Math.floor(focusTimeLeft / 60);
+        const secs = focusTimeLeft % 60;
+        document.getElementById('timeDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        
+        const progress = document.getElementById('timerProgress');
+        const percentage = focusTimeLeft / focusTotalDuration;
+        progress.style.strokeDashoffset = 283 - (283 * percentage);
+        
+        document.getElementById('todayFocusMins').innerText = window.appState.focusStats[currentDateString] || 0;
     }
 
-    window.exportData = function() {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([JSON.stringify({ classes, pdfs, notes, customTypes, folders, holidays })], { type: 'application/json' }));
-        a.download = `TrackerPro_Backup_${currentDateString}.json`; a.click();
+    window.setTimerMode = function(mode) {
+        if(isFocusRunning) window.toggleTimer();
+        document.querySelectorAll('.focus-mode-btn').forEach(b => { b.classList.remove('bg-slate-800', 'text-white'); b.classList.add('bg-slate-100', 'text-slate-500'); });
+        
+        if(mode === 'pomodoro') { focusTimeLeft = 25 * 60; document.getElementById('btnModePomodoro').classList.add('bg-slate-800', 'text-white'); }
+        if(mode === 'shortBreak') { focusTimeLeft = 5 * 60; document.getElementById('btnModeShort').classList.add('bg-slate-800', 'text-white'); }
+        if(mode === 'longBreak') { focusTimeLeft = 15 * 60; document.getElementById('btnModeLong').classList.add('bg-slate-800', 'text-white'); }
+        
+        focusTotalDuration = focusTimeLeft;
+        document.getElementById('timerStatus').innerText = "Ready";
+        window.updateFocusUI();
     }
 
-    window.importData = function(e) {
-        if(!e.target.files[0]) return; const reader = new FileReader();
-        reader.onload = function(evt) {
-            try { const d = JSON.parse(evt.target.result);
-                if(d.classes) classes = d.classes; if(d.pdfs) pdfs = d.pdfs; if(d.notes) notes = d.notes; if(d.customTypes) customTypes = d.customTypes; if(d.folders) folders = d.folders; if(d.holidays) holidays = d.holidays;
-                window.saveAllData(); renderTypeDropdowns(); renderFolderTabs('pdf'); renderFolderTabs('note'); alert("Data restored!"); window.switchTab('home');
-            } catch(err) { alert("Invalid backup file."); }
-        };
-        reader.readAsText(e.target.files[0]);
-    }
-
-    window.clearAllData = function() {
-        if(confirm("Are you sure? This deletes ALL data permanently.")) {
-            classes = []; pdfs = []; notes = []; holidays = []; customTypes = ['College', 'Batch', 'Other']; folders = { pdf: ['General'], note: ['General'] };
-            window.saveAllData(); renderTypeDropdowns(); renderFolderTabs('pdf'); renderFolderTabs('note'); alert("All data cleared.");
+    window.toggleTimer = function() {
+        const btn = document.getElementById('btnStartTimer');
+        const status = document.getElementById('timerStatus');
+        if (isFocusRunning) {
+            clearInterval(focusTimerInterval);
+            isFocusRunning = false;
+            btn.innerText = "Resume";
+            btn.classList.replace('bg-orange-500', 'bg-brand-600');
+            btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700');
+            status.innerText = "Paused";
+        } else {
+            isFocusRunning = true;
+            btn.innerText = "Pause";
+            btn.classList.replace('bg-brand-600', 'bg-orange-500');
+            btn.classList.replace('hover:bg-brand-700', 'hover:bg-orange-600');
+            status.innerText = "Focusing...";
+            
+            focusTimerInterval = setInterval(() => {
+                focusTimeLeft--;
+                window.updateFocusUI();
+                
+                // When timer completes
+                if(focusTimeLeft <= 0) {
+                    clearInterval(focusTimerInterval);
+                    isFocusRunning = false;
+                    btn.innerText = "Start";
+                    btn.classList.replace('bg-orange-500', 'bg-brand-600');
+                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-brand-700');
+                    status.innerText = "Done!";
+                    
+                    // Add to stats if it was a Pomodoro session
+                    if(focusTotalDuration === 25 * 60) {
+                        const todayStats = window.appState.focusStats[currentDateString] || 0;
+                        window.appState.focusStats[currentDateString] = todayStats + 25;
+                        window.saveDataToCloud();
+                        alert("Pomodoro Complete! Great job focusing.");
+                    } else {
+                        alert("Break time is over! Back to work.");
+                    }
+                    window.setTimerMode('pomodoro');
+                }
+            }, 1000);
         }
     }
 
-    renderTypeDropdowns(); renderFolderTabs('pdf'); renderFolderTabs('note'); window.saveAllData();
+    window.resetTimer = function() {
+        if(isFocusRunning) window.toggleTimer();
+        focusTimeLeft = focusTotalDuration;
+        document.getElementById('timerStatus').innerText = "Ready";
+        window.updateFocusUI();
+    }
+
 </script>
 </body>
 </html>
+
 
 
