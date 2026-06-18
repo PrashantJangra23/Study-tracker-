@@ -42,14 +42,12 @@
 
 <div class="max-w-2xl mx-auto p-4 space-y-6">
 
-    <!-- ================= PAGE 1: HOME ================= -->
     <main id="page-home" class="page-content block space-y-6">
         <header class="flex justify-between items-center pt-2">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Scholar 👋</h1>
+                <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Prashant 👋</h1>
                 <p class="text-sm text-slate-500 font-medium" id="homeDateDisplay"></p>
             </div>
-            <!-- Profile pic updates when logged in -->
             <div id="homeProfileIcon" class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shadow-sm border-2 border-white overflow-hidden">
                 <i class="fa-solid fa-user-graduate text-xl"></i>
             </div>
@@ -86,7 +84,6 @@
         </div>
     </main>
 
-    <!-- ================= PAGE 2: ALL CLASSES ================= -->
     <main id="page-schedule" class="page-content hidden space-y-4 pt-2">
         <header class="flex justify-between items-center mb-6">
             <div>
@@ -107,7 +104,6 @@
         </div>
     </main>
 
-    <!-- ================= PAGE 3: ANALYSIS ================= -->
     <main id="page-analysis" class="page-content hidden space-y-6 pt-2">
         <header class="flex justify-between items-center mb-2">
             <h2 class="text-2xl font-extrabold text-slate-800">Analysis</h2>
@@ -131,7 +127,6 @@
         </div>
     </main>
 
-    <!-- ================= PAGE 4: CALENDAR ================= -->
     <main id="page-calendar" class="page-content hidden space-y-6 pt-2">
         <header class="flex justify-between items-center mb-2">
             <h2 class="text-2xl font-extrabold text-slate-800">Calendar</h2>
@@ -159,34 +154,32 @@
         </div>
     </main>
 
-    <!-- ================= PAGE 5: PROFILE ================= -->
     <main id="page-profile" class="page-content hidden space-y-6 pt-2">
         <header class="mb-6"><h2 class="text-2xl font-extrabold text-slate-800">Profile & Account</h2></header>
         
-        <!-- Account Status Card -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col items-center text-center relative overflow-hidden">
             
-            <!-- Logged OUT View -->
             <div id="authLoggedOut" class="flex flex-col items-center w-full">
-                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-3">
-                    <i class="fa-solid fa-cloud text-3xl text-slate-400"></i>
+                <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-cloud text-2xl text-slate-400"></i>
                 </div>
-                <h3 class="font-bold text-lg text-slate-800 mb-1">Local Storage Mode</h3>
-                <p class="text-slate-500 text-xs mb-5">Sign in to sync your schedule, notes, and PDFs across all your devices securely.</p>
+                <h3 class="font-bold text-lg text-slate-800 mb-1">Sign In to Sync</h3>
+                <p class="text-slate-500 text-xs mb-4">Create an account or login to back up your schedule securely.</p>
                 
-                <button id="googleSignInBtn" class="w-full bg-white border border-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-3 hover:bg-slate-50 transition">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
-                    Sign in with Google
-                </button>
+                <input type="email" id="emailInput" placeholder="Email Address" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 outline-none text-sm focus:border-brand-500">
+                <input type="password" id="passwordInput" placeholder="Password (Min 6 characters)" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl mb-3 outline-none text-sm focus:border-brand-500">
+                
+                <div class="flex gap-2 w-full mt-2">
+                    <button id="registerBtn" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-slate-200 transition">Register</button>
+                    <button id="loginBtn" class="flex-1 bg-brand-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm hover:bg-brand-700 transition">Login</button>
+                </div>
             </div>
 
-            <!-- Logged IN View (Hidden by default) -->
             <div id="authLoggedIn" class="hidden flex flex-col items-center w-full">
-                <div class="w-20 h-20 bg-brand-100 rounded-full border-4 border-white shadow-md overflow-hidden mb-3" id="profileImageContainer">
-                    <img id="userProfilePic" src="" alt="Profile" class="w-full h-full object-cover hidden">
-                    <i id="userProfilePlaceholder" class="fa-solid fa-user text-3xl text-brand-600 mt-5"></i>
+                <div class="w-20 h-20 bg-brand-100 rounded-full border-4 border-white shadow-md overflow-hidden mb-3 flex items-center justify-center">
+                    <i class="fa-solid fa-user text-3xl text-brand-600"></i>
                 </div>
-                <h3 id="userName" class="font-bold text-xl text-slate-800 mb-0.5">User Name</h3>
+                <h3 class="font-bold text-xl text-slate-800 mb-0.5">Prashant</h3>
                 <p id="userEmail" class="text-slate-500 text-sm mb-4">user@email.com</p>
                 
                 <div class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full mb-5 flex items-center gap-1.5">
@@ -199,7 +192,6 @@
             </div>
         </div>
 
-        <!-- Offline Data Management -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <h3 class="font-bold text-xs uppercase text-slate-400 p-4 pb-2">Offline Data Management</h3>
             <div class="divide-y divide-slate-100">
@@ -221,7 +213,6 @@
 
 </div>
 
-<!-- ================= BOTTOM NAVIGATION ================= -->
 <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
     <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
         <button onclick="window.switchTab('home')" id="nav-home" class="nav-btn text-brand-600 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-house text-xl mb-0.5"></i><span class="text-[10px] font-bold">Home</span></button>
@@ -232,9 +223,6 @@
     </div>
 </nav>
 
-<!-- ================= MODALS ================= -->
-<!-- Same Modals as Previous Version (Add Class, PDF, Notes, Holidays) -->
-<!-- ADD CLASS MODAL -->
 <div id="classModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -287,7 +275,6 @@
     </div>
 </div>
 
-<!-- PDF BANK MODAL -->
 <div id="pdfBankModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-blue-50">
@@ -318,7 +305,6 @@
     </div>
 </div>
 
-<!-- NOTES MODAL -->
 <div id="notesModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl w-full max-w-md h-[85vh] flex flex-col">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-purple-50">
@@ -349,7 +335,6 @@
     </div>
 </div>
 
-<!-- ADD HOLIDAY MODAL -->
 <div id="holidayModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
         <h3 class="font-bold text-lg mb-4 text-slate-800">Add Global Holiday</h3>
@@ -362,12 +347,9 @@
     </div>
 </div>
 
-
-<!-- FIREBASE CLOUD & AUTHENTICATION SCRIPT -->
-<!-- THIS CODE WILL ONLY RUN ONCE YOU PROVIDE THE FIREBASE CONFIG KEYS -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
     const firebaseConfig = {
@@ -376,70 +358,70 @@
         projectId: "tracker-pro-6e84f",
         storageBucket: "tracker-pro-6e84f.firebasestorage.app",
         messagingSenderId: "790454899968",
-        appId: "1:790454899968:web:186ddc557a39c2387e0fe5",
-        measurementId: "G-8V9L8LF7N7"
+        appId: "1:790454899968:web:186ddc557a39c2387e0fe5"
     };
 
-    // UI Elements for Auth
-    const btnGoogleLogin = document.getElementById('googleSignInBtn');
+    const btnLogin = document.getElementById('loginBtn');
+    const btnRegister = document.getElementById('registerBtn');
     const btnSignOut = document.getElementById('signOutBtn');
     const authLoggedOut = document.getElementById('authLoggedOut');
     const authLoggedIn = document.getElementById('authLoggedIn');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
 
     try {
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
 
-        // Intercept local save to also sync to cloud
+        // Intercept local save to sync to cloud
         const originalSave = window.saveAllData;
         window.saveAllData = async function(skipCloud = false) {
             if(originalSave) originalSave();
             if(!skipCloud && window.cloudUserUid && window.cloudDb && window.appState) {
                 try {
                     await setDoc(doc(window.cloudDb, "users", window.cloudUserUid), {
-                        classes: window.appState.classes,
-                        pdfs: window.appState.pdfs,
-                        notes: window.appState.notes,
-                        customTypes: window.appState.customTypes,
-                        folders: window.appState.folders,
-                        holidays: window.appState.holidays
+                        classes: window.appState.classes, pdfs: window.appState.pdfs,
+                        notes: window.appState.notes, customTypes: window.appState.customTypes,
+                        folders: window.appState.folders, holidays: window.appState.holidays
                     });
                 } catch(e) { console.error("Cloud save failed:", e); }
             }
         };
 
-        // Google Login Button Click
-        btnGoogleLogin.addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch(error => {
-                console.error("Login Failed", error);
-                alert("Login failed. Make sure you completed Step 3 (Enable Google Sign-In) in Firebase.");
+        // Login Action
+        btnLogin.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!email || !password) return alert("Please enter email and password.");
+            
+            signInWithEmailAndPassword(auth, email, password).catch(error => {
+                alert("Login Failed: " + error.message);
             });
         });
 
-        // Sign Out Button Click
-        btnSignOut.addEventListener('click', () => {
-            signOut(auth).catch(error => console.error(error));
+        // Register Action
+        btnRegister.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!email || password.length < 6) return alert("Please enter a valid email and a password with at least 6 characters.");
+            
+            createUserWithEmailAndPassword(auth, email, password).catch(error => {
+                alert("Registration Failed: " + error.message);
+            });
         });
 
-        // Listen for Login State Changes
+        // Sign Out Action
+        btnSignOut.addEventListener('click', () => signOut(auth));
+
+        // State Change Listener
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // User is logged in! Update UI
                 authLoggedOut.classList.add('hidden');
                 authLoggedIn.classList.remove('hidden');
                 authLoggedIn.classList.add('flex');
                 
-                document.getElementById('userName').innerText = user.displayName;
                 document.getElementById('userEmail').innerText = user.email;
-                
-                if(user.photoURL) {
-                    document.getElementById('userProfilePic').src = user.photoURL;
-                    document.getElementById('userProfilePic').classList.remove('hidden');
-                    document.getElementById('userProfilePlaceholder').classList.add('hidden');
-                    document.getElementById('homeProfileIcon').innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
-                }
                 
                 window.cloudUserUid = user.uid;
                 window.cloudDb = db;
@@ -456,36 +438,24 @@
                         if(d.folders) window.appState.folders = d.folders;
                         if(d.holidays) window.appState.holidays = d.holidays;
                         
-                        // Re-render UI with cloud data without re-triggering cloud save
                         window.saveAllData(true); 
                         window.renderTypeDropdowns();
-                        window.renderFolderTabs('pdf'); 
-                        window.renderFolderTabs('note');
+                        window.renderFolderTabs('pdf'); window.renderFolderTabs('note');
                     } else {
-                        // First time login: push existing local data to cloud
-                        window.saveAllData();
+                        window.saveAllData(); // Push local data up
                     }
-                } catch(e) {
-                    console.error(e);
-                    alert("Cloud sync failed. Did you complete Step 4 (Enable Firestore Database in Test Mode)?");
-                }
+                } catch(e) { console.error(e); }
                 
             } else {
-                // User is logged out! Show local mode
                 window.cloudUserUid = null;
                 authLoggedOut.classList.remove('hidden');
                 authLoggedOut.classList.add('flex');
                 authLoggedIn.classList.add('hidden');
-                document.getElementById('homeProfileIcon').innerHTML = `<i class="fa-solid fa-user-graduate text-xl"></i>`;
             }
         });
-
-    } catch (e) {
-        console.error("Firebase setup error:", e);
-    }
+    } catch (e) { console.error(e); }
 </script>
 
-<!-- STANDARD LOCAL APP LOGIC (Same as before) -->
 <script>
     let classes = JSON.parse(localStorage.getItem('pw_classes_v2')) || [];
     let pdfs = JSON.parse(localStorage.getItem('pw_pdfs_v2')) || [];
@@ -699,7 +669,7 @@
         document.getElementById('analysisTitle').innerText = filter === 'All' ? 'Overall Attendance' : `${filter} Attendance`;
     }
 
-    window.saveAllData = function() {
+    window.saveAllData = function(skipCloud = false) {
         localStorage.setItem('pw_classes_v2', JSON.stringify(classes)); localStorage.setItem('pw_pdfs_v2', JSON.stringify(pdfs)); localStorage.setItem('pw_notes_v2', JSON.stringify(notes)); localStorage.setItem('pw_types_v2', JSON.stringify(customTypes)); localStorage.setItem('pw_folders_v2', JSON.stringify(folders)); localStorage.setItem('pw_holidays_v2', JSON.stringify(holidays));
         window.displayHomeClasses(); window.displayAllClasses(); if(!document.getElementById('page-analysis').classList.contains('hidden')) window.renderAnalysis();
     }
@@ -732,3 +702,5 @@
 </script>
 </body>
 </html>
+
+
