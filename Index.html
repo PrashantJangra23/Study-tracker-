@@ -30,11 +30,14 @@
         
         .timer-ring { fill: none; stroke: #e0e7ff; stroke-width: 4; }
         .timer-progress { fill: none; stroke: #4f46e5; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+        
+        .swipe-container { transition: transform 0.2s ease-out; }
 
-        /* Smooth full screen modal transitions */
-        .modal-base { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .slide-up { transform: translateY(100%); }
-        .slide-right { transform: translateX(100%); }
+        /* 3D Flip Card CSS */
+        .perspective { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
     </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen">
@@ -49,7 +52,8 @@
                 <h1 id="greetingName" class="text-2xl font-extrabold text-slate-800 tracking-tight">Hi, Scholar 👋</h1>
                 <p class="text-sm text-slate-500 font-medium" id="homeDateDisplay"></p>
             </div>
-            <div id="homeProfileIcon" class="w-11 h-11 rounded-full bg-gradient-to-tr from-brand-500 to-purple-500 flex items-center justify-center text-white shadow-md border-2 border-white overflow-hidden">
+            <!-- Profile Button Moved Here -->
+            <div id="homeProfileIcon" onclick="window.openModal('profileModal')" class="w-11 h-11 rounded-full bg-gradient-to-tr from-brand-500 to-purple-500 flex items-center justify-center text-white shadow-md border-2 border-white overflow-hidden cursor-pointer hover:scale-105 transition">
                 <i class="fa-solid fa-user text-lg"></i>
             </div>
         </header>
@@ -105,45 +109,41 @@
                 </div>
             </div>
 
-            <!-- Segmented Control for Timer Selection -->
             <div class="bg-slate-100 p-1.5 rounded-2xl flex w-full shadow-inner mb-6 relative">
                 <button onclick="window.setTimerMode('pomodoro', 25)" class="flex-1 py-2 text-xs font-bold rounded-xl transition focus-mode-btn bg-white shadow text-slate-800" id="btnModePomodoro">25m</button>
                 <button onclick="window.setTimerMode('shortBreak', 5)" class="flex-1 py-2 text-xs font-bold rounded-xl transition focus-mode-btn text-slate-500" id="btnModeShort">5m</button>
                 <button onclick="window.setTimerMode('longBreak', 15)" class="flex-1 py-2 text-xs font-bold rounded-xl transition focus-mode-btn text-slate-500" id="btnModeLong">15m</button>
-                <button onclick="window.setCustomTimer()" class="w-12 py-2 text-xs font-bold rounded-xl transition focus-mode-btn text-slate-500 flex justify-center items-center" id="btnModeCustom"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="window.setCustomTimer()" class="w-10 py-2 text-xs font-bold rounded-xl transition focus-mode-btn text-slate-500 flex justify-center items-center" id="btnModeCustom"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="window.setTimerMode('stopwatch')" class="w-10 py-2 text-xs font-bold rounded-xl transition focus-mode-btn text-slate-500 flex justify-center items-center" id="btnModeStopwatch" title="Stopwatch"><i class="fa-solid fa-stopwatch"></i></button>
             </div>
 
             <div class="flex gap-3 w-full">
                 <button id="btnStartTimer" onclick="window.toggleTimer()" class="flex-1 bg-brand-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-500/30 transition text-lg">Start</button>
-                <button onclick="window.resetTimer()" class="w-14 bg-slate-100 text-slate-600 font-bold py-3.5 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-rotate-right"></i></button>
+                <button id="btnResetTimer" onclick="window.resetTimer()" class="w-14 bg-slate-100 text-slate-600 font-bold py-3.5 rounded-2xl flex items-center justify-center transition hover:bg-slate-200">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
             </div>
         </div>
 
-        <!-- Session History -->
         <div class="w-full max-w-sm mt-2">
             <h4 class="font-bold text-slate-400 uppercase tracking-widest text-[10px] mb-3 px-1">Recent Sessions</h4>
             <div id="focusHistoryList" class="space-y-2"></div>
         </div>
     </main>
 
-    <!-- ================= PAGE 3: MODERN ANALYSIS ================= -->
+    <!-- ================= PAGE 3: DASHBOARD / ANALYSIS ================= -->
     <main id="page-analysis" class="page-content hidden space-y-5 pt-2">
         <header>
             <h2 class="text-2xl font-extrabold text-slate-800">Dashboard</h2>
             <p class="text-xs text-slate-500 font-medium">Your progress overview</p>
         </header>
 
-        <!-- Dynamic Graph -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
             <h3 class="text-slate-800 text-sm font-extrabold mb-1"><i class="fa-solid fa-chart-column text-brand-500 mr-1"></i> Focus History</h3>
-            <p class="text-xs text-slate-400 font-medium mb-4">Last 7 Days</p>
-            
-            <div class="flex items-end justify-between h-32 gap-2 w-full border-b border-slate-100 pb-1" id="focusGraph">
-                <!-- Injected via JS -->
-            </div>
+            <p class="text-xs text-slate-400 font-medium mb-4">Last 7 Days (Minutes)</p>
+            <div class="flex items-end justify-between h-32 gap-2 w-full border-b border-slate-100 pb-1" id="focusGraph"></div>
         </div>
 
-        <!-- Attendance Card -->
         <div class="bg-gradient-to-br from-indigo-50 to-white rounded-3xl shadow-sm border border-indigo-100 p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-indigo-900 text-sm font-extrabold"><i class="fa-solid fa-graduation-cap text-indigo-500 mr-1"></i> College Attendance</h3>
@@ -163,7 +163,6 @@
     <main id="page-calendar" class="page-content hidden space-y-6 pt-2">
         <header class="flex justify-between items-center mb-2">
             <h2 class="text-2xl font-extrabold text-slate-800">Calendar</h2>
-            <!-- Action Menu FAB instead of old add button -->
         </header>
         
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-5">
@@ -183,30 +182,25 @@
             <div id="selectedDateContent" class="space-y-3"></div>
         </div>
         
-        <!-- Floating Action Button inside Calendar -->
         <button onclick="window.openModal('actionMenuModal')" class="fixed bottom-20 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg shadow-brand-500/40 flex items-center justify-center text-2xl z-40 hover:scale-105 transition-transform">
             <i class="fa-solid fa-plus"></i>
         </button>
     </main>
 
-    <!-- ================= PAGE 5: PROFILE ================= -->
-    <main id="page-profile" class="page-content hidden space-y-6 pt-2">
-        <header class="mb-6"><h2 class="text-2xl font-extrabold text-slate-800">Profile</h2></header>
-        
-        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 flex flex-col items-center text-center">
-            <div class="w-24 h-24 bg-gradient-to-tr from-brand-400 to-purple-500 rounded-full border-4 border-white shadow-lg overflow-hidden mb-4 flex items-center justify-center">
-                <i class="fa-solid fa-user text-4xl text-white"></i>
+    <!-- ================= PAGE 5: FLASHCARDS (STUDY TOOL) ================= -->
+    <main id="page-flashcards" class="page-content hidden space-y-6 pt-2">
+        <header class="flex justify-between items-center mb-4">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-800">Flashcards</h2>
+                <p class="text-xs text-slate-500 font-medium">Active recall studying</p>
             </div>
-            <h3 class="font-black text-2xl text-slate-800 mb-1">Scholar</h3>
-            <p id="userEmail" class="text-slate-500 text-sm font-medium mb-6">user@email.com</p>
-            
-            <div class="bg-emerald-50 text-emerald-600 text-xs font-bold px-4 py-2 rounded-xl mb-8 flex items-center gap-2 border border-emerald-100">
-                <i class="fa-solid fa-cloud-check text-lg"></i> Synced to Cloud
-            </div>
-            
-            <button id="signOutBtn" class="w-full bg-slate-50 border border-slate-200 text-red-500 font-extrabold py-3.5 px-4 rounded-2xl transition">
-                Sign Out
+            <button onclick="window.openModal('addDeckModal')" class="bg-brand-50 text-brand-600 w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-brand-100 hover:bg-brand-100 transition">
+                <i class="fa-solid fa-plus"></i>
             </button>
+        </header>
+
+        <div id="decksList" class="grid grid-cols-2 gap-3">
+            <!-- Rendered via JS -->
         </div>
     </main>
 </div>
@@ -229,47 +223,55 @@
 </div>
 
 <!-- ================= BOTTOM NAVIGATION ================= -->
-<nav id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 z-40 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
+<nav id="bottomNav" class="hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 z-30 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
     <div class="flex justify-around items-center h-16 max-w-2xl mx-auto">
         <button onclick="window.switchTab('home')" id="nav-home" class="nav-btn text-brand-600 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-house text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Home</span></button>
         <button onclick="window.switchTab('focus')" id="nav-focus" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-stopwatch text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Focus</span></button>
         <button onclick="window.switchTab('analysis')" id="nav-analysis" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-chart-column text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Data</span></button>
         <button onclick="window.switchTab('calendar')" id="nav-calendar" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-regular fa-calendar text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Plan</span></button>
-        <button onclick="window.switchTab('profile')" id="nav-profile" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-user text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Me</span></button>
+        <!-- Replaced Profile with Cards (Flashcards) -->
+        <button onclick="window.switchTab('flashcards')" id="nav-flashcards" class="nav-btn text-slate-400 flex flex-col items-center w-14 gap-1"><i class="fa-solid fa-clone text-xl mb-0.5"></i><span class="text-[9px] font-extrabold uppercase tracking-wide">Cards</span></button>
     </div>
 </nav>
 
-<!-- ================= CUSTOM CONFIRM MODAL ================= -->
-<div id="confirmModal" class="app-modal hidden fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xs p-6 modal-base opacity-0 scale-95" id="confirmModalInner">
-        <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-2xl mb-4 mx-auto"><i class="fa-solid fa-trash-can"></i></div>
-        <h3 id="confirmTitle" class="text-xl font-extrabold text-center text-slate-800 mb-2">Delete Note?</h3>
-        <p class="text-sm text-center text-slate-500 font-medium mb-6">This action cannot be undone.</p>
-        <div class="flex gap-3">
-            <button id="confirmCancelBtn" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3.5 rounded-xl">Cancel</button>
-            <button id="confirmOkBtn" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-md shadow-red-500/30">Delete</button>
+<!-- ================= PROFILE MODAL ================= -->
+<div id="profileModal" class="app-modal hidden fixed inset-0 z-[90] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 flex flex-col items-center text-center modal-inner transition-all duration-300 scale-95 opacity-0 relative">
+        <button onclick="window.closeModal('profileModal')" class="absolute top-4 right-4 text-slate-400 w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center hover:bg-slate-100 transition"><i class="fa-solid fa-xmark"></i></button>
+        <div class="w-24 h-24 bg-gradient-to-tr from-brand-400 to-purple-500 rounded-full border-4 border-white shadow-lg overflow-hidden mb-4 flex items-center justify-center">
+            <i class="fa-solid fa-user text-4xl text-white"></i>
         </div>
+        <h3 class="font-black text-2xl text-slate-800 mb-1" id="profileNameDisplay">Scholar</h3>
+        <p id="userEmail" class="text-slate-500 text-sm font-medium mb-6">user@email.com</p>
+        
+        <div class="bg-emerald-50 text-emerald-600 text-xs font-bold px-4 py-2 rounded-xl mb-8 flex items-center gap-2 border border-emerald-100">
+            <i class="fa-solid fa-cloud-check text-lg"></i> Synced to Cloud
+        </div>
+        
+        <button id="signOutBtn" class="w-full bg-slate-50 border border-slate-200 text-red-500 font-extrabold py-3.5 px-4 rounded-2xl transition hover:bg-red-50">
+            Sign Out
+        </button>
     </div>
 </div>
 
-<!-- ================= ACTION MENU MODAL ================= -->
+<!-- ================= ACTION MENU MODAL (FAB) ================= -->
 <div id="actionMenuModal" class="app-modal hidden fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-sm flex items-end justify-center sm:items-center">
-    <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md p-6 modal-base slide-up" id="actionMenuInner">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md p-6 modal-base translate-y-full transition-transform duration-300 sm:translate-y-0 sm:scale-95 sm:opacity-0 modal-inner">
         <h3 class="font-extrabold text-slate-800 mb-6 text-center text-lg">Create New...</h3>
         <div class="grid grid-cols-4 gap-4 mb-6">
-            <button onclick="window.closeModal('actionMenuModal'); window.openModal('classModal')" class="flex flex-col items-center gap-2">
+            <button onclick="window.switchModal('actionMenuModal', 'classModal')" class="flex flex-col items-center gap-2">
                 <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-sm border border-indigo-100"><i class="fa-solid fa-chalkboard-user"></i></div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide text-slate-600">Class</span>
             </button>
-            <button onclick="window.closeModal('actionMenuModal'); window.openModal('taskModal')" class="flex flex-col items-center gap-2">
+            <button onclick="window.switchModal('actionMenuModal', 'taskModal')" class="flex flex-col items-center gap-2">
                 <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-sm border border-blue-100"><i class="fa-solid fa-check-double"></i></div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide text-slate-600">Task</span>
             </button>
-            <button onclick="window.closeModal('actionMenuModal'); window.openModal('habitModal')" class="flex flex-col items-center gap-2">
+            <button onclick="window.switchModal('actionMenuModal', 'habitModal')" class="flex flex-col items-center gap-2">
                 <div class="w-14 h-14 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl shadow-sm border border-orange-100"><i class="fa-solid fa-fire"></i></div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide text-slate-600">Habit</span>
             </button>
-            <button onclick="window.closeModal('actionMenuModal'); window.openModal('holidayModal')" class="flex flex-col items-center gap-2">
+            <button onclick="window.switchModal('actionMenuModal', 'holidayModal')" class="flex flex-col items-center gap-2">
                 <div class="w-14 h-14 rounded-2xl bg-yellow-50 text-yellow-500 flex items-center justify-center text-xl shadow-sm border border-yellow-100"><i class="fa-solid fa-umbrella-beach"></i></div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wide text-slate-600">Holiday</span>
             </button>
@@ -278,8 +280,92 @@
     </div>
 </div>
 
+<!-- ================= CONFIRM DELETE MODAL ================= -->
+<div id="confirmModal" class="app-modal hidden fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xs p-6 modal-base scale-95 opacity-0 transition-all duration-300 modal-inner">
+        <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center text-2xl mb-4 mx-auto"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 id="confirmTitle" class="text-xl font-extrabold text-center text-slate-800 mb-2">Delete this?</h3>
+        <p class="text-sm text-center text-slate-500 font-medium mb-6">This action cannot be undone.</p>
+        <div class="flex gap-3">
+            <button id="confirmCancelBtn" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-bold py-3.5 rounded-xl">Cancel</button>
+            <button id="confirmOkBtn" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl shadow-md shadow-red-500/30">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= FLASHCARDS MODALS ================= -->
+<div id="addDeckModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
+        <h3 class="font-extrabold text-lg mb-4 text-slate-800"><i class="fa-solid fa-clone text-brand-500 mr-2"></i>Create Deck</h3>
+        <input type="text" id="deckTitleInput" placeholder="Deck Name (e.g. Biology Ch 1)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium focus:border-brand-500">
+        <div class="flex gap-3">
+            <button onclick="window.closeModal('addDeckModal')" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-extrabold py-3.5 rounded-2xl">Cancel</button>
+            <button onclick="window.addDeck()" class="flex-1 bg-brand-600 text-white font-extrabold py-3.5 rounded-2xl shadow-md">Create</button>
+        </div>
+    </div>
+</div>
+
+<div id="studyDeckModal" class="app-modal hidden fixed inset-0 z-[70] bg-slate-50 flex flex-col transition-transform duration-300 translate-x-full">
+    <div class="px-4 py-4 border-b border-slate-200 flex justify-between items-center bg-white shadow-sm">
+        <button onclick="window.closeModal('studyDeckModal')" class="text-slate-500 w-10 h-10 flex items-center justify-center bg-slate-50 rounded-full border"><i class="fa-solid fa-arrow-left text-xl"></i></button>
+        <div class="font-extrabold text-lg text-slate-800 truncate px-4" id="studyDeckTitle">Deck Name</div>
+        <button onclick="window.deleteDeck()" class="text-red-500 w-10 h-10 flex items-center justify-center bg-red-50 rounded-full border border-red-100"><i class="fa-solid fa-trash-can"></i></button>
+    </div>
+    
+    <div class="flex-1 p-6 flex flex-col items-center justify-center bg-gradient-to-b from-brand-50/50 to-white">
+        <!-- Progress & Add -->
+        <div class="w-full max-w-sm flex justify-between items-center mb-6">
+            <span id="studyProgress" class="font-black text-xs text-brand-600 uppercase tracking-widest bg-brand-100 px-3 py-1 rounded-full border border-brand-200">0 / 0</span>
+            <button onclick="window.openModal('addCardModal')" class="text-[11px] font-extrabold text-white bg-slate-800 px-4 py-2 rounded-xl shadow-md hover:bg-slate-700 transition"><i class="fa-solid fa-plus mr-1"></i> Add Card</button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="studyEmptyState" class="hidden text-center py-10 w-full max-w-sm bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm">
+            <div class="text-brand-300 text-4xl mb-3"><i class="fa-regular fa-clone"></i></div>
+            <h4 class="font-extrabold text-slate-600 text-lg">Empty Deck</h4>
+            <p class="text-xs text-slate-400 font-medium mt-1 mb-4">Add some cards to start studying.</p>
+            <button onclick="window.openModal('addCardModal')" class="text-sm font-bold text-brand-600 bg-brand-50 px-6 py-2.5 rounded-full border border-brand-100">Create Card</button>
+        </div>
+
+        <!-- 3D Flip Card Container -->
+        <div id="studyCardContainer" class="perspective w-full max-w-sm h-72 cursor-pointer mb-8" onclick="document.getElementById('flashcardInner').classList.toggle('rotate-y-180')">
+            <div id="flashcardInner" class="w-full h-full relative preserve-3d transition-transform duration-500">
+                <!-- Front -->
+                <div class="absolute w-full h-full bg-white rounded-3xl shadow-lg border border-slate-200 flex flex-col items-center justify-center p-8 backface-hidden">
+                    <span class="absolute top-4 left-4 text-[9px] font-black text-slate-300 uppercase tracking-widest">Question</span>
+                    <h3 id="cardFrontText" class="text-xl sm:text-2xl font-bold text-center text-slate-800 leading-snug">...</h3>
+                    <div class="absolute bottom-4 right-4 text-brand-400 text-sm animate-pulse"><i class="fa-solid fa-rotate"></i> Tap to flip</div>
+                </div>
+                <!-- Back -->
+                <div class="absolute w-full h-full bg-brand-600 rounded-3xl shadow-lg border border-brand-500 flex flex-col items-center justify-center p-8 backface-hidden rotate-y-180">
+                    <span class="absolute top-4 left-4 text-[9px] font-black text-brand-300 uppercase tracking-widest">Answer</span>
+                    <h3 id="cardBackText" class="text-xl sm:text-2xl font-bold text-center text-white leading-snug">...</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div id="studyControls" class="flex gap-4 w-full max-w-sm">
+            <button onclick="window.prevCard()" class="flex-1 bg-white border border-slate-200 text-slate-600 font-extrabold py-4 rounded-2xl shadow-sm hover:bg-slate-50 transition flex items-center justify-center gap-2"><i class="fa-solid fa-arrow-left"></i> Prev</button>
+            <button onclick="window.nextCard()" class="flex-1 bg-white border border-slate-200 text-slate-600 font-extrabold py-4 rounded-2xl shadow-sm hover:bg-slate-50 transition flex items-center justify-center gap-2">Next <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+</div>
+
+<div id="addCardModal" class="app-modal hidden fixed inset-0 z-[90] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
+        <h3 class="font-extrabold text-lg mb-4 text-slate-800"><i class="fa-regular fa-square-plus text-brand-500 mr-2"></i>New Flashcard</h3>
+        <textarea id="cardQ" placeholder="Question / Front side..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl mb-3 outline-none font-medium focus:border-brand-500 resize-none h-24"></textarea>
+        <textarea id="cardA" placeholder="Answer / Back side..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium focus:border-brand-500 resize-none h-24"></textarea>
+        <div class="flex gap-3">
+            <button onclick="window.closeModal('addCardModal')" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-extrabold py-3.5 rounded-2xl">Cancel</button>
+            <button onclick="window.addCard()" class="flex-1 bg-slate-800 text-white font-extrabold py-3.5 rounded-2xl shadow-md">Save Card</button>
+        </div>
+    </div>
+</div>
+
 <!-- ================= FULL PAGE PDF BANK ================= -->
-<div id="pdfBankModal" class="app-modal hidden fixed inset-0 z-[70] bg-slate-50 flex flex-col modal-base slide-right">
+<div id="pdfBankModal" class="app-modal hidden fixed inset-0 z-[70] bg-slate-50 flex flex-col transition-transform duration-300 translate-x-full">
     <div class="px-4 py-4 border-b border-blue-100 flex justify-between items-center bg-blue-50">
         <button onclick="window.closeModal('pdfBankModal')" class="text-blue-800 w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-xl"></i></button>
         <div class="font-extrabold text-lg text-blue-900"><i class="fa-regular fa-file-pdf mr-1"></i> Library</div>
@@ -290,7 +376,7 @@
 </div>
 
 <!-- ================= FULL PAGE NOTES LIST ================= -->
-<div id="notesModal" class="app-modal hidden fixed inset-0 z-[70] bg-slate-50 flex flex-col modal-base slide-right">
+<div id="notesModal" class="app-modal hidden fixed inset-0 z-[70] bg-slate-50 flex flex-col transition-transform duration-300 translate-x-full">
     <div class="px-4 py-4 border-b border-purple-100 flex justify-between items-center bg-purple-50">
         <button onclick="window.closeModal('notesModal')" class="text-purple-800 w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-xl"></i></button>
         <div class="font-extrabold text-lg text-purple-900"><i class="fa-regular fa-bookmark mr-1"></i> Journal</div>
@@ -301,7 +387,7 @@
 </div>
 
 <!-- ================= FULL PAGE NOTE EDITOR ================= -->
-<div id="fullNoteModal" class="app-modal hidden fixed inset-0 z-[80] bg-white flex flex-col modal-base slide-right">
+<div id="fullNoteModal" class="app-modal hidden fixed inset-0 z-[80] bg-white flex flex-col transition-transform duration-300 translate-x-full">
     <div class="flex justify-between items-center px-4 py-3 border-b border-slate-100 shadow-sm bg-white">
         <button onclick="window.closeModal('fullNoteModal')" class="text-slate-500 w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-xl"></i></button>
         <h3 class="font-extrabold text-sm uppercase tracking-widest text-slate-400" id="noteModalHeader">Write</h3>
@@ -314,14 +400,13 @@
             <select id="noteFolderSelect" class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none text-sm font-bold shadow-sm text-slate-600"></select>
             <button onclick="window.addFolder('note')" class="bg-white border border-slate-200 px-4 rounded-2xl font-bold text-slate-600 shadow-sm"><i class="fa-solid fa-folder-plus"></i></button>
         </div>
-        <textarea id="noteContent" placeholder="Start typing your thoughts or checklists..." class="w-full flex-1 outline-none resize-none text-slate-700 leading-relaxed bg-transparent placeholder-slate-300 text-base font-medium"></textarea>
+        <textarea id="noteContent" placeholder="Start typing your thoughts or checklists..." class="w-full h-full flex-1 outline-none resize-none text-slate-700 leading-relaxed bg-transparent placeholder-slate-300 text-base font-medium"></textarea>
     </div>
 </div>
 
-<!-- ================= SMALLER CREATION MODALS ================= -->
-
+<!-- ================= CREATION MODALS ================= -->
 <div id="addPdfModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-base opacity-0 scale-95">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
         <h3 class="font-extrabold text-lg mb-4 text-slate-800">Add Document</h3>
         <input type="text" id="pdfTitle" placeholder="Title (e.g. History NCERT)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-3 outline-none font-medium">
         <input type="url" id="pdfUrl" placeholder="Link (Drive, Web)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-4 outline-none font-medium">
@@ -337,10 +422,10 @@
 </div>
 
 <div id="holidayModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-base opacity-0 scale-95">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
         <h3 class="font-extrabold text-lg mb-4 text-slate-800"><i class="fa-solid fa-umbrella-beach text-yellow-500 mr-2"></i>Global Holiday</h3>
         <input type="text" id="holTitle" placeholder="Holiday Name (e.g. Diwali)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-3 outline-none font-medium">
-        <input type="date" id="holDate" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium">
+        <input type="date" id="holDate" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium text-slate-500">
         <div class="flex gap-3">
             <button onclick="window.closeModal('holidayModal')" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-extrabold py-3.5 rounded-2xl">Cancel</button>
             <button onclick="window.addGlobalHoliday()" class="flex-1 bg-yellow-500 text-white font-extrabold py-3.5 rounded-2xl shadow-md">Save</button>
@@ -349,10 +434,10 @@
 </div>
 
 <div id="taskModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-base opacity-0 scale-95">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
         <h3 class="font-extrabold text-lg mb-4 text-slate-800"><i class="fa-solid fa-check-double text-blue-500 mr-2"></i>Add Task</h3>
         <input type="text" id="taskTitle" placeholder="Task Name (e.g. Read Ch 4)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-3 outline-none font-medium">
-        <input type="date" id="taskDate" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium">
+        <input type="date" id="taskDate" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium text-slate-500">
         <div class="flex gap-3">
             <button onclick="window.closeModal('taskModal')" class="flex-1 bg-slate-50 border border-slate-200 text-slate-600 font-extrabold py-3.5 rounded-2xl">Cancel</button>
             <button onclick="window.addTask()" class="flex-1 bg-blue-600 text-white font-extrabold py-3.5 rounded-2xl shadow-md">Save</button>
@@ -361,7 +446,7 @@
 </div>
 
 <div id="habitModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-base opacity-0 scale-95">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 modal-inner transition-all duration-300 scale-95 opacity-0">
         <h3 class="font-extrabold text-lg mb-4 text-slate-800"><i class="fa-solid fa-fire text-orange-500 mr-2"></i>Create Habit</h3>
         <p class="text-xs text-slate-400 font-medium mb-4">Habits build streaks when you check them off every day.</p>
         <input type="text" id="habitTitle" placeholder="Habit Name (e.g. 1hr coding)" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-6 outline-none font-medium">
@@ -372,11 +457,10 @@
     </div>
 </div>
 
-<!-- Class modal (same as before but updated CSS classes for consistency) -->
 <div id="classModal" class="app-modal hidden fixed inset-0 z-[80] bg-slate-900/40 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
-    <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] modal-base slide-up">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] modal-inner transition-transform duration-300 translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0">
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h2 class="text-xl font-extrabold text-slate-800">Add Class</h2>
+            <h2 class="text-xl font-extrabold text-slate-800">Schedule Class</h2>
             <button onclick="window.closeModal('classModal')" class="bg-white text-slate-500 w-8 h-8 rounded-full border shadow-sm flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="p-6 overflow-y-auto no-scrollbar">
@@ -422,10 +506,10 @@
     </div>
 </div>
 
-<!-- FIREBASE CLOUD SCRIPT -->
+<!-- ================= SCRIPTS ================= -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { initializeAuth, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
     const firebaseConfig = {
@@ -436,78 +520,85 @@
 
     try {
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        let auth;
+        try { auth = initializeAuth(app, { persistence: browserLocalPersistence }); } 
+        catch(e) { auth = getAuth(app); }
+        
         const db = getFirestore(app);
 
-        window.saveDataToCloud = async function() {
+        window.saveDataToCloud = async function(silent = false) {
             if(!window.cloudUserUid) return;
             try {
                 await setDoc(doc(db, "users", window.cloudUserUid), {
                     classes: window.appState.classes, pdfs: window.appState.pdfs, notes: window.appState.notes,
                     customTypes: window.appState.customTypes, folders: window.appState.folders, holidays: window.appState.holidays,
                     focusStats: window.appState.focusStats, focusHistory: window.appState.focusHistory,
-                    tasks: window.appState.tasks, habits: window.appState.habits
+                    tasks: window.appState.tasks, habits: window.appState.habits, decks: window.appState.decks
                 });
-                window.updateUI();
+                if(!silent && window.updateUI) window.updateUI();
             } catch(e) { console.error("Cloud save failed:", e); }
         };
 
-        document.getElementById('loginBtn').addEventListener('click', () => {
+        const safeBind = (id, func) => { const el = document.getElementById(id); if(el) el.addEventListener('click', func); }
+        
+        safeBind('loginBtn', () => {
             const e = document.getElementById('emailInput').value.trim(); const p = document.getElementById('passwordInput').value.trim();
             if (!e || !p) return; document.getElementById('loginBtn').innerText = "Loading...";
             signInWithEmailAndPassword(auth, e, p).catch(err => { document.getElementById('loginBtn').innerText = "Login"; alert(err.message); });
         });
 
-        document.getElementById('registerBtn').addEventListener('click', () => {
+        safeBind('registerBtn', () => {
             const e = document.getElementById('emailInput').value.trim(); const p = document.getElementById('passwordInput').value.trim();
-            if (!e || p.length < 6) return; document.getElementById('registerBtn').innerText = "Loading...";
+            if (!e || p.length < 6) return alert("Valid email & min 6 char password required."); document.getElementById('registerBtn').innerText = "Loading...";
             createUserWithEmailAndPassword(auth, e, p).catch(err => { document.getElementById('registerBtn').innerText = "Create Account"; alert(err.message); });
         });
 
-        document.getElementById('signOutBtn').addEventListener('click', () => {
-            if(confirm("Sign out? Data is safely synced to the cloud.")) signOut(auth);
-        });
+        safeBind('signOutBtn', () => { if(confirm("Sign out? Data is safely synced to the cloud.")) signOut(auth); window.closeModal('profileModal'); });
 
         onAuthStateChanged(auth, async (user) => {
+            const as = document.getElementById('authScreen'); const ac = document.getElementById('appContainer'); const bn = document.getElementById('bottomNav');
             if (user) {
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                document.getElementById('bottomNav').classList.remove('hidden');
-                document.getElementById('userEmail').innerText = user.email;
-                document.getElementById('greetingName').innerText = "Hi, " + user.email.split('@')[0] + " 👋";
+                if(as) as.classList.add('hidden'); if(ac) ac.classList.remove('hidden'); if(bn) bn.classList.remove('hidden');
+                const uEmail = document.getElementById('userEmail'); if(uEmail) uEmail.innerText = user.email;
+                const gName = document.getElementById('greetingName'); if(gName) gName.innerText = "Hi, " + user.email.split('@')[0] + " 👋";
+                const pName = document.getElementById('profileNameDisplay'); if(pName) pName.innerText = user.email.split('@')[0];
                 window.cloudUserUid = user.uid;
                 
                 try {
                     const docSnap = await getDoc(doc(db, "users", user.uid));
-                    if (docSnap.exists()) {
+                    if (docSnap.exists() && window.appState) {
                         const d = docSnap.data();
                         window.appState.classes = d.classes || []; window.appState.pdfs = d.pdfs || []; window.appState.notes = d.notes || [];
                         window.appState.customTypes = d.customTypes || ['College', 'Batch', 'Other'];
                         window.appState.folders = d.folders || { pdf: ['General'], note: ['General'] };
                         window.appState.holidays = d.holidays || []; window.appState.focusStats = d.focusStats || {}; window.appState.focusHistory = d.focusHistory || [];
-                        window.appState.tasks = d.tasks || []; window.appState.habits = d.habits || [];
-                    } else { window.saveDataToCloud(); }
+                        window.appState.tasks = d.tasks || []; window.appState.habits = d.habits || []; window.appState.decks = d.decks || [];
+                    } else if (window.saveDataToCloud) { window.saveDataToCloud(); }
                     
-                    window.updateUI(); window.renderTypeDropdowns(); window.renderFolderTabs('pdf'); window.renderFolderTabs('note'); window.switchTab('home'); 
+                    if(window.renderTypeDropdowns) window.renderTypeDropdowns(); 
+                    if(window.renderFolderTabs) { window.renderFolderTabs('pdf'); window.renderFolderTabs('note'); }
+                    if(window.updateUI) window.updateUI(); 
+                    if(window.switchTab) window.switchTab('home'); 
                 } catch(e) { console.error(e); }
             } else {
                 window.cloudUserUid = null;
-                window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = []; window.appState.tasks = []; window.appState.habits = [];
-                document.getElementById('authScreen').classList.remove('hidden');
-                document.getElementById('appContainer').classList.add('hidden');
-                document.getElementById('bottomNav').classList.add('hidden');
-                document.getElementById('loginBtn').innerText = "Login"; document.getElementById('registerBtn').innerText = "Create Account";
+                if(window.appState) { window.appState.classes = []; window.appState.pdfs = []; window.appState.notes = []; window.appState.tasks = []; window.appState.habits = []; window.appState.decks = []; }
+                if(as) as.classList.remove('hidden'); if(ac) ac.classList.add('hidden'); if(bn) bn.classList.add('hidden');
+                const lBtn = document.getElementById('loginBtn'); if(lBtn) lBtn.innerText = "Login"; 
+                const rBtn = document.getElementById('registerBtn'); if(rBtn) rBtn.innerText = "Create Account";
             }
         });
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Firebase init skipped:", e); }
 </script>
 
-<!-- STANDARD APP LOGIC -->
 <script>
-    // In-memory state only
+    // State Initialization
+    const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+    const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+
     window.appState = {
         classes: [], pdfs: [], notes: [], customTypes: ['College', 'Batch', 'Other'],
-        folders: { pdf: ['General'], note: ['General'] }, holidays: [], focusStats: {}, focusHistory: [], tasks: [], habits: []
+        folders: { pdf: ['General'], note: ['General'] }, holidays: [], focusStats: {}, focusHistory: [], tasks: [], habits: [], decks: []
     };
     
     let activePdfFolder = 'General'; let activeNoteFolder = 'General';
@@ -516,58 +607,71 @@
     const todayObj = new Date(); const offset = todayObj.getTimezoneOffset(); const todayLocal = new Date(todayObj.getTime() - (offset*60*1000));
     const currentDateString = todayLocal.toISOString().split('T')[0];
 
-    document.getElementById('homeDateDisplay').innerText = todayObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-    document.getElementById('dateInput').value = currentDateString; document.getElementById('holDate').value = currentDateString; document.getElementById('taskDate').value = currentDateString;
+    setTxt('homeDateDisplay', todayObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }));
+    setVal('dateInput', currentDateString); setVal('holDate', currentDateString); setVal('taskDate', currentDateString);
 
-    const quotes = ["Push yourself, because no one else is going to do it.", "Sometimes later becomes never. Do it now.", "Great things never come from comfort zones.", "Success doesn't just find you. You have to go get it.", "The harder you work, the greater you'll feel."];
-    document.getElementById('dailyQuote').innerText = `"${quotes[todayObj.getDay() % quotes.length]}"`;
+    // Modals & History Safe Logic
+    window.openModal = function(id) {
+        const m = document.getElementById(id); if(!m) return;
+        m.classList.remove('hidden');
+        setTimeout(() => {
+            if(m.classList.contains('translate-x-full')) m.classList.remove('translate-x-full');
+            const inner = m.querySelector('.modal-inner');
+            if(inner) {
+                if(inner.classList.contains('translate-y-full')) inner.classList.remove('translate-y-full', 'sm:translate-y-0');
+                if(inner.classList.contains('scale-95')) { inner.classList.remove('scale-95', 'opacity-0', 'sm:scale-95', 'sm:opacity-0'); inner.classList.add('scale-100', 'opacity-100'); }
+            }
+        }, 10);
+        try { history.pushState({modal: id}, null, ''); } catch(e) {} 
+    }
+    
+    window.switchModal = function(closeId, openId) {
+        window.closeModal(closeId, true);
+        setTimeout(() => { window.openModal(openId); }, 150);
+    }
 
-    // Navigation & Modals (Back Button Support)
+    window.closeModal = function(id, fromHistory = false) {
+        const m = document.getElementById(id); if(!m) return;
+        
+        if (m.classList.contains('transition-transform') && !m.querySelector('.modal-inner')) {
+            m.classList.add('translate-x-full');
+        }
+        
+        const inner = m.querySelector('.modal-inner');
+        if(inner) {
+            inner.classList.remove('scale-100', 'opacity-100');
+            if (m.classList.contains('items-end')) inner.classList.add('translate-y-full', 'sm:translate-y-0');
+            else inner.classList.add('scale-95', 'opacity-0');
+        }
+        
+        setTimeout(() => m.classList.add('hidden'), 300);
+        if(!fromHistory) { try { history.back(); } catch(e) {} }
+    }
+
+    window.addEventListener('popstate', () => { document.querySelectorAll('.app-modal:not(.hidden)').forEach(m => { window.closeModal(m.id, true); }); });
+
+    window.customConfirm = function(msg) {
+        return new Promise((resolve) => {
+            setTxt('confirmTitle', msg);
+            const m = document.getElementById('confirmModal'); if(!m) return resolve(true); 
+            m.classList.remove('hidden');
+            setTimeout(() => { const sc = m.querySelector('.modal-inner'); if(sc) { sc.classList.remove('scale-95', 'opacity-0'); sc.classList.add('scale-100', 'opacity-100'); } }, 10);
+            try { history.pushState({modal: 'confirmModal'}, null, ''); } catch(e){}
+            document.getElementById('confirmOkBtn').onclick = () => { window.closeModal('confirmModal'); resolve(true); };
+            document.getElementById('confirmCancelBtn').onclick = () => { window.closeModal('confirmModal'); resolve(false); };
+        });
+    }
+
     window.switchTab = function(tabId) {
         document.querySelectorAll('.page-content').forEach(p => { p.classList.add('hidden'); p.classList.remove('block'); });
-        document.getElementById(`page-${tabId}`).classList.remove('hidden'); document.getElementById(`page-${tabId}`).classList.add('block');
+        const p = document.getElementById(`page-${tabId}`); if(p) { p.classList.remove('hidden'); p.classList.add('block'); }
         document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('text-brand-600'); b.classList.add('text-slate-400'); });
-        document.getElementById(`nav-${tabId}`).classList.remove('text-slate-400'); document.getElementById(`nav-${tabId}`).classList.add('text-brand-600');
+        const n = document.getElementById(`nav-${tabId}`); if(n) { n.classList.remove('text-slate-400'); n.classList.add('text-brand-600'); }
         window.scrollTo(0, 0);
         if(tabId === 'calendar') { window.renderCalendar(); window.selectCalendarDate(currentDateString); }
         if(tabId === 'analysis') window.renderAnalysis();
         if(tabId === 'focus') window.updateFocusUI();
-    }
-
-    window.openModal = function(id) {
-        const m = document.getElementById(id); m.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            if(m.querySelector('.slide-up')) m.querySelector('.slide-up').classList.remove('slide-up');
-            if(m.querySelector('.slide-right')) m.querySelector('.slide-right').classList.remove('slide-right');
-            if(m.querySelector('.scale-95')) { m.querySelector('.scale-95').classList.remove('scale-95', 'opacity-0'); m.querySelector('.scale-95').classList.add('scale-100', 'opacity-100'); }
-        });
-        history.pushState({modal: id}, null, ''); // Add to history state
-    }
-
-    window.closeModal = function(id, goBack = true) {
-        const m = document.getElementById(id);
-        if(m.querySelector('.scale-100')) { m.querySelector('.scale-100').classList.remove('scale-100', 'opacity-100'); m.querySelector('.scale-100').classList.add('scale-95', 'opacity-0'); }
-        if(!m.querySelector('.slide-up') && m.querySelector('.bg-white.rounded-t-3xl')) m.querySelector('.bg-white.rounded-t-3xl').classList.add('slide-up');
-        if(!m.querySelector('.slide-right') && m.querySelector('.bg-white.h-screen') || m.id==='pdfBankModal' || m.id==='notesModal' || m.id==='fullNoteModal') {
-            if(m.firstElementChild) m.firstElementChild.parentElement.classList.add('slide-right');
-        }
-        setTimeout(() => m.classList.add('hidden'), 300);
-        if(goBack) history.back();
-    }
-
-    window.addEventListener('popstate', (e) => {
-        document.querySelectorAll('.app-modal:not(.hidden)').forEach(m => { window.closeModal(m.id, false); });
-    });
-
-    window.customConfirm = function(msg) {
-        return new Promise((resolve) => {
-            history.pushState({modal: 'confirmModal'}, null, '');
-            const m = document.getElementById('confirmModal'); m.classList.remove('hidden');
-            requestAnimationFrame(() => { m.querySelector('.scale-95').classList.remove('scale-95', 'opacity-0'); m.querySelector('.scale-95').classList.add('scale-100', 'opacity-100'); });
-            
-            document.getElementById('confirmOkBtn').onclick = () => { window.closeModal('confirmModal'); resolve(true); };
-            document.getElementById('confirmCancelBtn').onclick = () => { window.closeModal('confirmModal'); resolve(false); };
-        });
+        if(tabId === 'flashcards') window.renderDecks();
     }
 
     function isCollegeType(type) { const t = type.toLowerCase(); return t.includes('college') || t.includes('bsc') || t.includes('bed') || t.includes('university'); }
@@ -575,21 +679,48 @@
 
     window.renderTypeDropdowns = function() {
         const html = window.appState.customTypes.map(t => `<option value="${t}">${t}</option>`).join('');
-        document.getElementById('type').innerHTML = html;
-        document.getElementById('homeTypeFilter').innerHTML = '<option value="All">All Classes</option>' + html;
+        const typeEl = document.getElementById('type'); if(typeEl) typeEl.innerHTML = html;
+        const filterEl = document.getElementById('homeTypeFilter'); if(filterEl) filterEl.innerHTML = '<option value="All">All Classes</option>' + html;
     }
-    window.addNewType = function() { const n = prompt("New Class Type:"); if (n && n.trim()) { window.appState.customTypes.push(n.trim()); window.renderTypeDropdowns(); document.getElementById('type').value = n.trim(); window.saveDataToCloud(); } }
+    window.addNewType = function() { const n = prompt("New Class Type:"); if (n && n.trim()) { window.appState.customTypes.push(n.trim()); window.renderTypeDropdowns(); setVal('type', n.trim()); if(window.saveDataToCloud) window.saveDataToCloud(); } }
 
-    // Classes
+    const frm = document.getElementById('trackerForm');
+    if(frm) {
+        frm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const baseName = document.getElementById('courseName').value.trim(); const startDateStr = document.getElementById('dateInput').value;
+            const timeStr = document.getElementById('time').value; const typeStr = document.getElementById('type').value;
+            const isRepeat = document.getElementById('isRepeat').checked;
+            const selectedDays = Array.from(document.querySelectorAll('#repeatDays input:checked')).map(cb => parseInt(cb.value));
+            const isColl = isCollegeType(typeStr);
+
+            if (!isRepeat || selectedDays.length === 0) {
+                let stat = 'Pending'; if (isColl && window.appState.holidays.some(h => h.date === startDateStr)) stat = 'Holiday';
+                window.appState.classes.push({ id: Date.now().toString(), name: baseName, date: startDateStr, time: timeStr, type: typeStr, status: stat });
+            } else {
+                const startD = new Date(startDateStr);
+                for(let i=0; i<56; i++) {
+                    let loopD = new Date(startD); loopD.setDate(loopD.getDate() + i);
+                    if (selectedDays.includes(loopD.getDay())) {
+                        const localLoopDateStr = loopD.toISOString().split('T')[0];
+                        let stat = 'Pending'; if (isColl && window.appState.holidays.some(h => h.date === localLoopDateStr)) stat = 'Holiday';
+                        window.appState.classes.push({ id: Date.now().toString() + i, name: baseName, date: localLoopDateStr, time: timeStr, type: typeStr, status: stat });
+                    }
+                }
+            }
+            if(window.saveDataToCloud) window.saveDataToCloud(); frm.reset(); const rd = document.getElementById('repeatDays'); if(rd) rd.classList.add('hidden'); window.closeModal('classModal');
+        });
+    }
+
     function renderClassCard(cls) {
         const tStr = formatTime(cls.time); const isColl = isCollegeType(cls.type);
-        let actionArea = '', colors = 'bg-white border-slate-100', badge = 'bg-slate-100 text-slate-600', icon = 'fa-chalkboard-user';
+        let actionArea = '', colors = 'bg-white border-slate-100', badge = 'bg-slate-100 text-slate-600', icon = 'fa-chalkboard-user text-slate-400';
 
         if (isColl) {
             colors = 'bg-gradient-to-br from-indigo-50 to-white border-indigo-100'; badge = 'bg-indigo-100 text-indigo-700 border-indigo-200'; icon = 'fa-graduation-cap text-indigo-400';
             const getBtnCls = (c) => cls.status === c ? `bg-indigo-600 text-white border-indigo-600` : `bg-white/60 text-slate-500 border-indigo-100`;
             actionArea = `<div class="mt-2.5 flex gap-2"><button onclick="window.updateStatus('${cls.id}', 'Attended')" class="flex-1 text-[9px] uppercase tracking-wider font-extrabold py-1.5 rounded-lg border transition ${getBtnCls('Attended')}">Attend</button><button onclick="window.updateStatus('${cls.id}', 'Bunked')" class="flex-1 text-[9px] uppercase tracking-wider font-extrabold py-1.5 rounded-lg border transition ${getBtnCls('Bunked')}">Bunk</button><button onclick="window.updateStatus('${cls.id}', 'Holiday')" class="flex-1 text-[9px] uppercase tracking-wider font-extrabold py-1.5 rounded-lg border transition ${getBtnCls('Holiday')}">Holiday</button></div>`;
-        } else if (cls.type.toLowerCase().includes('batch')) {
+        } else if (cls.type.toLowerCase().includes('batch') || cls.type.toLowerCase().includes('tuition')) {
             colors = 'bg-gradient-to-br from-emerald-50 to-white border-emerald-100'; badge = 'bg-emerald-100 text-emerald-700 border-emerald-200'; icon = 'fa-users text-emerald-400';
             const isDone = cls.status === 'Done';
             actionArea = `<div class="mt-2.5 flex justify-between items-center"><label class="flex items-center gap-2 cursor-pointer"><div class="relative flex items-center justify-center w-5 h-5 rounded-md border border-emerald-200 bg-white shadow-sm"><input type="checkbox" class="peer sr-only task-check" ${isDone ? 'checked' : ''} onchange="window.updateStatus('${cls.id}', this.checked ? 'Done' : 'Pending')"><div class="absolute inset-0 rounded flex items-center justify-center check-anim"><svg class="w-3 h-3 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div><span class="text-xs font-bold ${isDone ? 'text-emerald-600 line-through opacity-70' : 'text-slate-500'}">Complete</span></label><button onclick="window.deleteClass('${cls.id}')" class="text-slate-300 hover:text-red-500 w-6 h-6 flex items-center justify-center"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`;
@@ -603,14 +734,10 @@
             <div class="p-3.5 rounded-2xl shadow-sm border relative ${colors}">
                 ${isColl && cls.status === 'Holiday' ? `<div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Holiday</div>` : ''}
                 ${isColl && cls.status === 'Bunked' ? `<div class="absolute top-3 right-3 bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Bunked</div>` : ''}
-                
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center shadow-sm shrink-0 border border-white"><i class="fa-solid ${icon} text-lg"></i></div>
                     <div class="flex-1 w-full truncate pr-10">
-                        <div class="flex items-center gap-2 mb-0.5">
-                            <span class="text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-widest ${badge}">${cls.type}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="fa-regular fa-clock mr-0.5"></i> ${tStr || 'Anytime'}</span>
-                        </div>
+                        <div class="flex items-center gap-2 mb-0.5"><span class="text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-widest ${badge}">${cls.type}</span><span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"><i class="fa-regular fa-clock mr-0.5"></i> ${tStr || 'Anytime'}</span></div>
                         <h4 class="font-extrabold text-slate-800 text-sm truncate">${cls.name}</h4>
                     </div>
                 </div>
@@ -620,178 +747,256 @@
     }
 
     window.displayHomeClasses = function() {
-        const f = document.getElementById('homeTypeFilter').value || "All";
+        const filterEle = document.getElementById('homeTypeFilter'); if(!filterEle) return;
+        const filter = filterEle.value || "All";
         let todays = window.appState.classes.filter(c => c.date === currentDateString);
-        if (f !== 'All') todays = todays.filter(c => c.type === f);
+        if (filter !== 'All') todays = todays.filter(c => c.type === filter);
         todays.sort((a,b) => (a.time||"24:00").localeCompare(b.time||"24:00"));
-        document.getElementById('homeClassesList').innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Free Day</p></div>`;
+        const list = document.getElementById('homeClassesList');
+        if(list) list.innerHTML = todays.length ? todays.map(renderClassCard).join('') : `<div class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Free Day</p></div>`;
     }
 
-    window.updateStatus = function(id, st) { const c = window.appState.classes.find(x => x.id === id); if(c) { c.status = st; window.saveDataToCloud(); } }
-    window.deleteClass = async function(id) { if(await window.customConfirm("Delete this scheduled class?")) { window.appState.classes = window.appState.classes.filter(x => x.id !== id); window.saveDataToCloud(); } }
+    window.updateStatus = function(id, st) { const c = window.appState.classes.find(x => x.id === id); if(c) { c.status = st; if(window.saveDataToCloud) window.saveDataToCloud(true); window.displayHomeClasses(); } }
+    window.deleteClass = async function(id) { if(await window.customConfirm("Delete this class?")) { window.appState.classes = window.appState.classes.filter(x => x.id !== id); if(window.saveDataToCloud) window.saveDataToCloud(); } }
 
-    // Tasks & Habits
     window.renderTasksHabits = function() {
-        const container = document.getElementById('tasksHabitsList');
         let html = '';
-        
-        // Render Habits
-        window.appState.habits.forEach(h => {
-            // Check streak
+        (window.appState.habits || []).forEach(h => {
             let isDoneToday = h.lastDoneDate === currentDateString;
-            
-            html += `
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <button onclick="window.checkHabit('${h.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition ${isDoneToday ? 'bg-orange-500 text-white shadow-md' : 'bg-orange-50 text-orange-300 hover:bg-orange-100'}">
-                        <i class="fa-solid fa-fire text-lg"></i>
-                    </button>
-                    <div>
-                        <h4 class="font-extrabold text-slate-800 text-sm ${isDoneToday ? 'line-through opacity-60' : ''}">${h.title}</h4>
-                        <span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest"><i class="fa-solid fa-fire-flame-curved"></i> Streak: ${h.streak}</span>
-                    </div>
-                </div>
-                <button onclick="window.deleteHabit('${h.id}')" class="text-slate-200 hover:text-red-500 px-2"><i class="fa-solid fa-trash-can"></i></button>
-            </div>`;
+            html += `<div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><div class="flex items-center gap-3"><button onclick="window.checkHabit('${h.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition ${isDoneToday ? 'bg-orange-500 text-white shadow-md' : 'bg-orange-50 text-orange-300 hover:bg-orange-100'}"><i class="fa-solid fa-fire text-lg"></i></button><div><h4 class="font-extrabold text-slate-800 text-sm ${isDoneToday ? 'line-through opacity-60' : ''}">${h.title}</h4><span class="text-[10px] font-bold text-orange-500 uppercase tracking-widest"><i class="fa-solid fa-fire-flame-curved"></i> Streak: ${h.streak}</span></div></div><button onclick="window.deleteHabit('${h.id}')" class="text-slate-200 hover:text-red-500 px-2"><i class="fa-solid fa-trash-can"></i></button></div>`;
         });
-
-        // Render Today's Tasks
-        const todayTasks = window.appState.tasks.filter(t => t.date === currentDateString);
+        const todayTasks = (window.appState.tasks || []).filter(t => t.date === currentDateString);
         todayTasks.forEach(t => {
-            html += `
-            <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                <label class="flex items-center gap-3 cursor-pointer flex-1">
-                    <div class="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-blue-200 bg-white">
-                        <input type="checkbox" class="peer sr-only task-check" ${t.done ? 'checked' : ''} onchange="window.toggleTask('${t.id}', this.checked)">
-                        <div class="absolute inset-0 rounded-md flex items-center justify-center check-anim">
-                            <svg class="w-3.5 h-3.5 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    </div>
-                    <span class="text-sm font-extrabold ${t.done ? 'text-slate-400 line-through' : 'text-slate-700'}">${t.title}</span>
-                </label>
-                <button onclick="window.deleteTask('${t.id}')" class="text-slate-200 hover:text-red-500 pl-3 border-l border-slate-100"><i class="fa-solid fa-trash-can"></i></button>
-            </div>`;
+            html += `<div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between"><label class="flex items-center gap-3 cursor-pointer flex-1"><div class="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-blue-200 bg-white"><input type="checkbox" class="peer sr-only task-check" ${t.done ? 'checked' : ''} onchange="window.toggleTask('${t.id}', this.checked)"><div class="absolute inset-0 rounded-md flex items-center justify-center check-anim"><svg class="w-3.5 h-3.5 text-white opacity-0 transform scale-50 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg></div></div><span class="text-sm font-extrabold ${t.done ? 'text-slate-400 line-through' : 'text-slate-700'}">${t.title}</span></label><button onclick="window.deleteTask('${t.id}')" class="text-slate-200 hover:text-red-500 pl-3 border-l border-slate-100"><i class="fa-solid fa-trash-can"></i></button></div>`;
         });
-
-        if(html === '') html = `<div class="text-center py-5 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-bold text-xs uppercase tracking-widest">No Tasks/Habits</p></div>`;
-        container.innerHTML = html;
+        const container = document.getElementById('tasksHabitsList');
+        if(container) container.innerHTML = html === '' ? `<div class="text-center py-5 bg-slate-50 rounded-2xl border border-dashed border-slate-200"><p class="text-slate-400 font-bold text-xs uppercase tracking-widest">No Tasks or Habits</p></div>` : html;
     }
 
-    window.addTask = function() { const t = document.getElementById('taskTitle').value.trim(); const d = document.getElementById('taskDate').value; if(t) { window.appState.tasks.push({ id: Date.now().toString(), title: t, date: d, done: false }); window.saveDataToCloud(); document.getElementById('taskTitle').value=''; window.closeModal('taskModal'); } }
-    window.addHabit = function() { const t = document.getElementById('habitTitle').value.trim(); if(t) { window.appState.habits.push({ id: Date.now().toString(), title: t, streak: 0, lastDoneDate: null }); window.saveDataToCloud(); document.getElementById('habitTitle').value=''; window.closeModal('habitModal'); } }
-    window.toggleTask = function(id, st) { const t = window.appState.tasks.find(x => x.id === id); if(t) { t.done = st; window.saveDataToCloud(); } }
+    window.addTask = function() { const t = document.getElementById('taskTitle').value.trim(); const d = document.getElementById('taskDate').value; if(t) { window.appState.tasks.push({ id: Date.now().toString(), title: t, date: d, done: false }); if(window.saveDataToCloud) window.saveDataToCloud(); document.getElementById('taskTitle').value=''; window.closeModal('taskModal'); } }
+    window.addHabit = function() { const t = document.getElementById('habitTitle').value.trim(); if(t) { window.appState.habits.push({ id: Date.now().toString(), title: t, streak: 0, lastDoneDate: null }); if(window.saveDataToCloud) window.saveDataToCloud(); document.getElementById('habitTitle').value=''; window.closeModal('habitModal'); } }
+    window.toggleTask = function(id, st) { const t = window.appState.tasks.find(x => x.id === id); if(t) { t.done = st; if(window.saveDataToCloud) window.saveDataToCloud(true); window.renderTasksHabits(); } }
     window.checkHabit = function(id) { 
         const h = window.appState.habits.find(x => x.id === id); 
-        if(h && h.lastDoneDate !== currentDateString) { 
-            // Calculate streak
-            if(h.lastDoneDate) {
-                const lastD = new Date(h.lastDoneDate); const todayD = new Date(currentDateString);
-                const diffTime = Math.abs(todayD - lastD); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                if(diffDays === 1) h.streak++; else h.streak = 1;
-            } else { h.streak = 1; }
-            h.lastDoneDate = currentDateString; window.saveDataToCloud(); 
+        if(h) { 
+            if(h.lastDoneDate === currentDateString) { 
+                h.lastDoneDate = h.prevDate || null; h.streak = Math.max(0, h.streak - 1); 
+            } else {
+                h.prevDate = h.lastDoneDate;
+                if(h.lastDoneDate) {
+                    const lastD = new Date(h.lastDoneDate); const todayD = new Date(currentDateString);
+                    const diffDays = Math.round(Math.abs(todayD - lastD) / (1000 * 60 * 60 * 24));
+                    if(diffDays === 1) h.streak++; else h.streak = 1;
+                } else { h.streak = 1; }
+                h.lastDoneDate = currentDateString; 
+            }
+            if(window.saveDataToCloud) window.saveDataToCloud(true); window.renderTasksHabits();
         } 
     }
-    window.deleteTask = async function(id) { if(await window.customConfirm("Delete this task?")) { window.appState.tasks = window.appState.tasks.filter(x => x.id !== id); window.saveDataToCloud(); } }
-    window.deleteHabit = async function(id) { if(await window.customConfirm("Delete this habit and its streak?")) { window.appState.habits = window.appState.habits.filter(x => x.id !== id); window.saveDataToCloud(); } }
+    window.deleteTask = async function(id) { if(await window.customConfirm("Delete this task?")) { window.appState.tasks = window.appState.tasks.filter(x => x.id !== id); if(window.saveDataToCloud) window.saveDataToCloud(); } }
+    window.deleteHabit = async function(id) { if(await window.customConfirm("Delete this habit?")) { window.appState.habits = window.appState.habits.filter(x => x.id !== id); if(window.saveDataToCloud) window.saveDataToCloud(); } }
 
     window.updateUI = function() {
         window.displayHomeClasses(); window.renderTasksHabits();
-        if(!document.getElementById('page-analysis').classList.contains('hidden')) window.renderAnalysis();
+        const pa = document.getElementById('page-analysis'); if(pa && !pa.classList.contains('hidden')) window.renderAnalysis();
         window.updateFocusUI();
+        window.renderDecks();
     }
 
     // Folders
     window.renderFolderTabs = function(type) {
-        const listId = type === 'pdf' ? 'pdfFoldersList' : 'noteFoldersList';
-        const activeF = type === 'pdf' ? activePdfFolder : activeNoteFolder;
-        document.getElementById(listId).innerHTML = window.appState.folders[type].map(f => `<button onclick="window.setActiveFolder('${type}', '${f}')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition ${f === activeF ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">${f}</button>`).join('');
-        document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').innerHTML = window.appState.folders[type].map(f => `<option value="${f}">${f}</option>`).join('');
+        const listId = type === 'pdf' ? 'pdfFoldersList' : 'noteFoldersList'; const activeF = type === 'pdf' ? activePdfFolder : activeNoteFolder;
+        const e1 = document.getElementById(listId); if(e1) e1.innerHTML = window.appState.folders[type].map(f => `<button onclick="window.setActiveFolder('${type}', '${f}')" class="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-bold transition ${f === activeF ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">${f}</button>`).join('');
+        const e2 = document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect'); if(e2) e2.innerHTML = window.appState.folders[type].map(f => `<option value="${f}">${f}</option>`).join('');
     }
     window.setActiveFolder = function(type, f) { if(type === 'pdf') { activePdfFolder = f; window.renderPdfs(); } else { activeNoteFolder = f; window.renderNotes(); } window.renderFolderTabs(type); }
-    window.addFolder = function(type) { const n = prompt("New Folder Name:"); if(n && n.trim() && !window.appState.folders[type].includes(n.trim())) { window.appState.folders[type].push(n.trim()); window.saveDataToCloud(); window.renderFolderTabs(type); document.getElementById(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect').value = n.trim(); } }
+    window.addFolder = function(type) { const n = prompt("New Folder Name:"); if(n && n.trim() && !window.appState.folders[type].includes(n.trim())) { window.appState.folders[type].push(n.trim()); if(window.saveDataToCloud) window.saveDataToCloud(); window.renderFolderTabs(type); setVal(type === 'pdf' ? 'pdfFolderSelect' : 'noteFolderSelect', n.trim()); } }
 
     // PDFs
     window.renderPdfs = function() {
         const filtered = window.appState.pdfs.filter(p => p.folder === activePdfFolder);
-        if(filtered.length === 0) { document.getElementById('pdfList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
-        document.getElementById('pdfList').innerHTML = filtered.map(p => `<div class="bg-white p-3.5 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm"><div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-50 text-blue-600 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-xl"><i class="fa-regular fa-file-pdf"></i></div><div class="truncate"><h5 class="font-extrabold text-sm text-slate-800 truncate mb-0.5">${p.title}</h5><a href="${p.url}" target="_blank" class="text-[9px] font-black text-blue-500 hover:underline uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">Open Link <i class="fa-solid fa-arrow-up-right-from-square ml-0.5"></i></a></div></div><button onclick="window.deletePdf('${p.id}')" class="text-slate-300 hover:text-red-500 px-3 shrink-0"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`).join('');
+        const el = document.getElementById('pdfList'); if(!el) return;
+        if(filtered.length === 0) { el.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
+        el.innerHTML = filtered.map(p => `<div class="bg-white p-3.5 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm"><div class="flex items-center gap-3 overflow-hidden"><div class="bg-blue-50 text-blue-600 w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-xl"><i class="fa-regular fa-file-pdf"></i></div><div class="truncate"><h5 class="font-extrabold text-sm text-slate-800 truncate mb-0.5">${p.title}</h5><a href="${p.url}" target="_blank" class="text-[9px] font-black text-blue-500 hover:underline uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">Open Link <i class="fa-solid fa-arrow-up-right-from-square ml-0.5"></i></a></div></div><button onclick="window.deletePdf('${p.id}')" class="text-slate-300 hover:text-red-500 px-3 shrink-0"><i class="fa-solid fa-trash-can text-sm"></i></button></div>`).join('');
     }
-    window.addPdf = function() { const title = document.getElementById('pdfTitle').value.trim(); const url = document.getElementById('pdfUrl').value.trim(); const fld = document.getElementById('pdfFolderSelect').value; if(title && url) { window.appState.pdfs.push({ id: Date.now().toString(), title, url, folder: fld }); window.saveDataToCloud(); document.getElementById('pdfTitle').value = ''; document.getElementById('pdfUrl').value = ''; window.closeModal('addPdfModal'); window.setActiveFolder('pdf', fld); } }
-    window.deletePdf = async function(id) { if(await window.customConfirm("Delete this document link?")) { window.appState.pdfs = window.appState.pdfs.filter(p => p.id !== id); window.saveDataToCloud(); window.renderPdfs(); } }
+    window.addPdf = function() { const title = document.getElementById('pdfTitle').value.trim(); const url = document.getElementById('pdfUrl').value.trim(); const fld = document.getElementById('pdfFolderSelect').value; if(title && url) { window.appState.pdfs.push({ id: Date.now().toString(), title, url, folder: fld }); if(window.saveDataToCloud) window.saveDataToCloud(); setVal('pdfTitle', ''); setVal('pdfUrl', ''); window.closeModal('addPdfModal'); window.setActiveFolder('pdf', fld); } }
+    window.deletePdf = async function(id) { if(await window.customConfirm("Delete this document link?")) { window.appState.pdfs = window.appState.pdfs.filter(p => p.id !== id); if(window.saveDataToCloud) window.saveDataToCloud(); window.renderPdfs(); } }
 
-    // Notes (Swipe + Full Editor)
     let ntX = 0; let activeNoteId = null;
-    window.ntStart = e => { ntX = e.changedTouches[0].screenX; };
+    window.ntStart = e => { ntX = e.touches ? e.touches[0].clientX : e.clientX; };
     window.ntEnd = (e, id) => {
-        let dX = e.changedTouches[0].screenX - ntX;
-        let el = document.getElementById('note-fg-'+id);
-        if(dX < -40) { 
-            if(activeNoteId && activeNoteId !== id) document.getElementById('note-fg-'+activeNoteId).style.transform = 'translateX(0)';
-            el.style.transform = 'translateX(-120px)'; activeNoteId = id;
-        } else if(dX > 40) { el.style.transform = 'translateX(0)'; activeNoteId = null; }
+        let eX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX; let dX = eX - ntX;
+        let el = document.getElementById('note-fg-'+id); if(!el) return;
+        if(dX < -40) { if(activeNoteId && activeNoteId !== id) { let old = document.getElementById('note-fg-'+activeNoteId); if(old) old.style.transform = 'translateX(0)'; } el.style.transform = 'translateX(-120px)'; activeNoteId = id; } 
+        else if(dX > 40) { el.style.transform = 'translateX(0)'; activeNoteId = null; }
     };
 
     window.renderNotes = function() {
         const filtered = window.appState.notes.filter(n => n.folder === activeNoteFolder);
-        if(filtered.length === 0) { document.getElementById('notesList').innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
-        document.getElementById('notesList').innerHTML = filtered.map(n => `
+        const el = document.getElementById('notesList'); if(!el) return;
+        if(filtered.length === 0) { el.innerHTML = '<p class="text-center text-slate-400 text-sm py-8 font-medium">Empty Folder</p>'; return; }
+        el.innerHTML = filtered.map(n => `
             <div class="relative overflow-hidden rounded-2xl mb-3 shadow-sm border border-slate-100 bg-slate-100">
                 <div class="absolute inset-y-0 right-0 flex">
                     <button onclick="window.editNote('${n.id}')" class="w-[60px] bg-blue-500 text-white flex justify-center items-center text-xl"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="window.deleteNote('${n.id}')" class="w-[60px] bg-red-500 text-white flex justify-center items-center text-xl"><i class="fa-solid fa-trash"></i></button>
                 </div>
-                <div id="note-fg-${n.id}" class="relative bg-gradient-to-br from-purple-50 to-white p-5 transition-transform duration-200 ease-out z-10 w-full" ontouchstart="window.ntStart(event)" ontouchend="window.ntEnd(event, '${n.id}')">
+                <div id="note-fg-${n.id}" class="swipe-container relative bg-gradient-to-br from-purple-50 to-white p-5 z-10 w-full" ontouchstart="window.ntStart(event)" ontouchend="window.ntEnd(event, '${n.id}')" onmousedown="window.ntStart(event)" onmouseup="window.ntEnd(event, '${n.id}')">
                     <h5 class="font-extrabold text-sm text-purple-900 mb-1.5">${n.title}</h5>
                     <p class="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed font-medium">${n.content.substring(0, 80)}${n.content.length > 80 ? '...' : ''}</p>
                     <span class="text-[8px] font-black text-purple-400/80 uppercase tracking-widest block mt-3">${n.date}</span>
                 </div>
+            </div>`).join('');
+    }
+
+    window.openFullNoteModal = function() { activeNoteId = null; setVal('editNoteId', ''); setVal('noteTitle', ''); setVal('noteContent', ''); setTxt('noteModalHeader', 'Create'); window.openModal('fullNoteModal'); }
+    window.editNote = function(id) {
+        const n = window.appState.notes.find(x => x.id === id); if(!n) return;
+        const fgel = document.getElementById('note-fg-'+id); if(fgel) fgel.style.transform = 'translateX(0)'; activeNoteId = null;
+        setVal('editNoteId', n.id); setVal('noteTitle', n.title); setVal('noteContent', n.content); setVal('noteFolderSelect', n.folder); setTxt('noteModalHeader', 'Edit'); window.openModal('fullNoteModal');
+    }
+    window.saveNote = function() {
+        const id = document.getElementById('editNoteId').value; const title = document.getElementById('noteTitle').value.trim() || 'Untitled'; const content = document.getElementById('noteContent').value.trim(); const fld = document.getElementById('noteFolderSelect').value;
+        if(!content) return alert("Note cannot be empty");
+        if(id) { const idx = window.appState.notes.findIndex(n => n.id === id); if(idx > -1) { window.appState.notes[idx].title = title; window.appState.notes[idx].content = content; window.appState.notes[idx].folder = fld; } } 
+        else { window.appState.notes.unshift({ id: Date.now().toString(), title, content, date: currentDateString, folder: fld }); }
+        if(window.saveDataToCloud) window.saveDataToCloud(); window.closeModal('fullNoteModal'); window.setActiveFolder('note', fld);
+    }
+    window.deleteNote = async function(id) { 
+        if(await window.customConfirm("Delete Note?")) { window.appState.notes = window.appState.notes.filter(n => n.id !== id); if(window.saveDataToCloud) window.saveDataToCloud(); window.renderNotes(); } 
+        else { const e = document.getElementById('note-fg-'+id); if(e) e.style.transform = 'translateX(0)'; activeNoteId = null; }
+    }
+
+    // Flashcards / Active Recall Logic
+    let activeDeckId = null;
+    let studyCardIndex = 0;
+
+    window.renderDecks = function() {
+        const list = document.getElementById('decksList');
+        if(!list) return;
+        if(!window.appState.decks || window.appState.decks.length === 0) {
+            list.innerHTML = `<div class="col-span-2 text-center py-8 bg-white rounded-3xl border border-dashed border-slate-200 shadow-sm"><p class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-3">No decks created yet</p><button onclick="window.openModal('addDeckModal')" class="text-xs font-bold text-brand-600 bg-brand-50 px-4 py-2 rounded-full">Create your first deck</button></div>`;
+            return;
+        }
+        list.innerHTML = window.appState.decks.map(d => `
+            <div onclick="window.openDeck('${d.id}')" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 cursor-pointer hover:border-brand-300 hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4 group-hover:bg-brand-600 group-hover:text-white transition"><i class="fa-regular fa-clone text-xl"></i></div>
+                <h4 class="font-extrabold text-slate-800 text-sm mb-1 truncate">${d.title}</h4>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${d.cards ? d.cards.length : 0} Cards</p>
             </div>
         `).join('');
     }
 
-    window.openFullNoteModal = function() {
-        activeNoteId = null; document.getElementById('editNoteId').value = ''; document.getElementById('noteTitle').value = ''; document.getElementById('noteContent').value = ''; document.getElementById('noteModalHeader').innerText = "Create"; window.openModal('fullNoteModal');
+    window.addDeck = function() {
+        const title = document.getElementById('deckTitleInput').value.trim();
+        if(title) {
+            window.appState.decks.push({ id: Date.now().toString(), title: title, cards: [] });
+            if(window.saveDataToCloud) window.saveDataToCloud();
+            setVal('deckTitleInput', '');
+            window.closeModal('addDeckModal');
+            window.renderDecks();
+        }
     }
-    window.editNote = function(id) {
-        const n = window.appState.notes.find(x => x.id === id); if(!n) return;
-        document.getElementById('note-fg-'+id).style.transform = 'translateX(0)'; activeNoteId = null;
-        document.getElementById('editNoteId').value = n.id; document.getElementById('noteTitle').value = n.title; document.getElementById('noteContent').value = n.content; document.getElementById('noteFolderSelect').value = n.folder; document.getElementById('noteModalHeader').innerText = "Edit"; window.openModal('fullNoteModal');
+
+    window.openDeck = function(id) { 
+        activeDeckId = id; 
+        studyCardIndex = 0;
+        const deck = window.appState.decks.find(d => d.id === id);
+        if(!deck) return;
+        setTxt('studyDeckTitle', deck.title);
+        window.renderStudyCard();
+        window.openModal('studyDeckModal');
     }
-    window.saveNote = function() {
-        const id = document.getElementById('editNoteId').value; const title = document.getElementById('noteTitle').value.trim() || 'Untitled'; const content = document.getElementById('noteContent').value.trim(); const fld = document.getElementById('noteFolderSelect').value;
-        if(!content) { alert("Note cannot be empty"); return; }
-        if(id) { const idx = window.appState.notes.findIndex(n => n.id === id); if(idx > -1) { window.appState.notes[idx].title = title; window.appState.notes[idx].content = content; window.appState.notes[idx].folder = fld; } } 
-        else { window.appState.notes.unshift({ id: Date.now().toString(), title, content, date: currentDateString, folder: fld }); }
-        window.saveDataToCloud(); window.closeModal('fullNoteModal'); window.setActiveFolder('note', fld);
+
+    window.renderStudyCard = function() {
+        const deck = window.appState.decks.find(d => d.id === activeDeckId);
+        const container = document.getElementById('studyCardContainer');
+        const emptyState = document.getElementById('studyEmptyState');
+        const controls = document.getElementById('studyControls');
+        
+        if(!deck.cards || deck.cards.length === 0) {
+            container.classList.add('hidden');
+            controls.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            setTxt('studyProgress', '0 / 0');
+        } else {
+            container.classList.remove('hidden');
+            controls.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            
+            const card = deck.cards[studyCardIndex];
+            const inner = document.getElementById('flashcardInner');
+            inner.classList.remove('rotate-y-180'); // reset flip
+            
+            // Allow animation to reset visually if they skipped while flipped
+            setTimeout(() => {
+                setTxt('cardFrontText', card.q);
+                setTxt('cardBackText', card.a);
+            }, 100); 
+
+            setTxt('studyProgress', `${studyCardIndex + 1} / ${deck.cards.length}`);
+        }
     }
-    window.deleteNote = async function(id) { 
-        if(await window.customConfirm("Permanently delete this note?")) { window.appState.notes = window.appState.notes.filter(n => n.id !== id); window.saveDataToCloud(); window.renderNotes(); } 
-        else { document.getElementById('note-fg-'+id).style.transform = 'translateX(0)'; activeNoteId = null; }
+
+    window.nextCard = function() {
+        const deck = window.appState.decks.find(d => d.id === activeDeckId);
+        if(deck && deck.cards && studyCardIndex < deck.cards.length - 1) {
+            studyCardIndex++;
+            window.renderStudyCard();
+        }
+    }
+
+    window.prevCard = function() {
+        if(studyCardIndex > 0) {
+            studyCardIndex--;
+            window.renderStudyCard();
+        }
+    }
+
+    window.addCard = function() {
+        const q = document.getElementById('cardQ').value.trim();
+        const a = document.getElementById('cardA').value.trim();
+        if(q && a) {
+            const deck = window.appState.decks.find(d => d.id === activeDeckId);
+            if(!deck.cards) deck.cards = [];
+            deck.cards.push({q, a});
+            if(window.saveDataToCloud) window.saveDataToCloud();
+            setVal('cardQ', ''); setVal('cardA', '');
+            window.closeModal('addCardModal');
+            window.renderStudyCard();
+            window.renderDecks();
+        }
+    }
+
+    window.deleteDeck = async function() {
+        if(await window.customConfirm("Delete this entire deck?")) {
+            window.appState.decks = window.appState.decks.filter(d => d.id !== activeDeckId);
+            if(window.saveDataToCloud) window.saveDataToCloud();
+            window.closeModal('studyDeckModal');
+            window.renderDecks();
+        }
     }
 
     // Holidays & Calendar
-    window.addGlobalHoliday = function() { const title = document.getElementById('holTitle').value.trim(); const date = document.getElementById('holDate').value; if(title && date) { window.appState.holidays.push({ date, title }); window.appState.classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; }); window.saveDataToCloud(); document.getElementById('holTitle').value = ''; window.closeModal('holidayModal'); } }
+    window.addGlobalHoliday = function() { const title = document.getElementById('holTitle').value.trim(); const date = document.getElementById('holDate').value; if(title && date) { window.appState.holidays.push({ date, title }); window.appState.classes.forEach(c => { if(c.date === date && isCollegeType(c.type)) c.status = 'Holiday'; }); if(window.saveDataToCloud) window.saveDataToCloud(); setVal('holTitle', ''); window.closeModal('holidayModal'); } }
     window.changeMonth = function(dir) { currentMonth += dir; if(currentMonth > 11) { currentMonth = 0; currentYear++; } else if(currentMonth < 0) { currentMonth = 11; currentYear--; } window.renderCalendar(); }
+    
     window.renderCalendar = function() {
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        document.getElementById('calendarMonthYear').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+        setTxt('calendarMonthYear', `${["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][currentMonth]} ${currentYear}`);
         const firstDay = new Date(currentYear, currentMonth, 1).getDay(); const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         let gridHtml = ''; for(let i = 0; i < firstDay; i++) gridHtml += `<div></div>`;
         for(let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const dayClasses = window.appState.classes.filter(c => c.date === dateStr); const dayHols = window.appState.holidays.filter(h => h.date === dateStr); const dayNotes = window.appState.notes.filter(n => n.date === dateStr);
-            let indicators = '';
-            if(dayHols.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>`; else if(dayClasses.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-brand-500"></div>`;
-            if(dayNotes.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>`;
+            let indicators = ''; if(dayHols.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>`; else if(dayClasses.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-brand-500"></div>`; if(dayNotes.length > 0) indicators += `<div class="w-1.5 h-1.5 rounded-full bg-purple-400"></div>`;
             const isToday = dateStr === currentDateString; const bgClass = isToday ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-100';
             gridHtml += `<div onclick="window.selectCalendarDate('${dateStr}')" class="p-2 rounded-2xl cursor-pointer flex flex-col items-center justify-center min-h-[48px] ${bgClass} transition"><span class="text-sm ${isToday ? 'font-black' : 'font-bold'}">${d}</span><div class="flex gap-0.5 mt-1 h-1.5">${indicators}</div></div>`;
         }
-        document.getElementById('calendarGrid').innerHTML = gridHtml;
+        const cg = document.getElementById('calendarGrid'); if(cg) cg.innerHTML = gridHtml;
     }
 
     window.selectCalendarDate = function(dateStr) {
-        const dObj = new Date(dateStr); document.getElementById('selectedDateTitle').innerText = dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+        const dObj = new Date(dateStr); setTxt('selectedDateTitle', dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }));
         const dayClasses = window.appState.classes.filter(c => c.date === dateStr); const dayHols = window.appState.holidays.filter(h => h.date === dateStr); const dayNotes = window.appState.notes.filter(n => n.date === dateStr);
         let html = '';
         if(dayHols.length > 0) dayHols.forEach(h => html += `<div class="bg-yellow-50 text-yellow-800 p-3 rounded-2xl border border-yellow-200 text-xs font-black uppercase tracking-widest mb-3"><i class="fa-solid fa-star text-yellow-500 mr-1.5"></i> Holiday: ${h.title}</div>`);
@@ -809,19 +1014,24 @@
                 dayNotes.forEach(n => html += `<div class="bg-purple-50 p-3 rounded-2xl border border-purple-100 text-purple-900 font-bold text-xs mb-2"><i class="fa-regular fa-bookmark opacity-50 mr-1.5"></i> ${n.title}</div>`);
             }
         }
-        document.getElementById('selectedDateContent').innerHTML = html; document.getElementById('calendarDayDetails').classList.remove('hidden');
+        const sdc = document.getElementById('selectedDateContent'); if(sdc) sdc.innerHTML = html; 
+        const cdd = document.getElementById('calendarDayDetails'); if(cdd) cdd.classList.remove('hidden');
     }
 
-    // Modern Analysis (with Chart)
+    // Modern Analysis
     window.renderAnalysis = function() {
-        // Attendance
         let collegeCls = window.appState.classes.filter(c => isCollegeType(c.type) && c.status !== 'Pending' && c.status !== 'Holiday');
         let att = collegeCls.filter(c => c.status === 'Attended' || c.status === 'Done').length; let bnked = collegeCls.filter(c => c.status === 'Bunked').length;
         let total = att + bnked; let pct = total > 0 ? Math.round((att / total) * 100) : 0;
-        document.getElementById('statAtt').innerText = att; document.getElementById('statBnk').innerText = bnked; document.getElementById('attPercentText').innerText = pct + '%'; document.getElementById('attProgressBar').style.width = pct + '%';
-        document.getElementById('attProgressBar').className = 'h-2 rounded-full transition-all duration-1000 ' + (pct >= 75 ? 'bg-indigo-500' : (pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'));
 
-        // Bar Chart Data (Last 7 Days)
+        setTxt('statAtt', att); setTxt('statBnk', bnked); setTxt('attPercentText', pct + '%'); 
+        const pb = document.getElementById('attProgressBar'); if(pb) pb.style.width = pct + '%';
+        if(pb) pb.className = 'h-2 rounded-full transition-all duration-1000 ' + (pct >= 75 ? 'bg-indigo-500' : (pct >= 50 ? 'bg-yellow-500' : 'bg-red-500'));
+
+        let totalFocusAllTime = Object.values(window.appState.focusStats).reduce((a, b) => a + b, 0);
+        let focusToday = window.appState.focusStats[currentDateString] || 0;
+        setTxt('statTotalFocus', totalFocusAllTime); setTxt('statTodayFocusDesc', `${focusToday} mins focused today`);
+
         let graphHtml = ''; let maxFocus = 0; const last7Days = [];
         for(let i=6; i>=0; i--) {
             let d = new Date(todayLocal); d.setDate(d.getDate() - i); const dStr = d.toISOString().split('T')[0];
@@ -829,71 +1039,106 @@
             last7Days.push({ label: d.toLocaleDateString('en-US', {weekday:'short'}), val: dayFocus, isToday: i===0 });
         }
         if(maxFocus === 0) maxFocus = 1; 
-        
         last7Days.forEach(day => {
-            const heightPct = Math.max((day.val / maxFocus) * 100, 5); // min 5% height for visibility
+            const heightPct = Math.min(Math.max((day.val / maxFocus) * 100, 5), 100); 
             graphHtml += `<div class="flex flex-col items-center flex-1 h-full pt-4"><div class="w-full max-w-[20px] bg-slate-100 rounded-t-xl relative flex items-end justify-center h-full group transition"><div class="${day.isToday ? 'bg-brand-500' : 'bg-slate-300'} w-full rounded-t-xl transition-all duration-1000 absolute bottom-0" style="height: ${heightPct}%;"></div><span class="text-[8px] font-black text-slate-700 z-10 opacity-0 group-hover:opacity-100 transition absolute -top-4">${day.val}</span></div><span class="text-[8px] font-extrabold ${day.isToday ? 'text-brand-600' : 'text-slate-400'} mt-1 uppercase">${day.label}</span></div>`;
         });
-        document.getElementById('focusGraph').innerHTML = graphHtml;
+        const fg = document.getElementById('focusGraph'); if(fg) fg.innerHTML = graphHtml;
     }
 
-    // Focus Timer
-    let focusTimerInterval; let focusTimeLeft = 25 * 60; let focusTotalDuration = 25 * 60; let isFocusRunning = false;
+    // Timer Logic
+    let focusTimerInterval; let focusTimeLeft = 25 * 60; let focusTotalDuration = 25 * 60; let isFocusRunning = false; window.isStopwatch = false; let focusTimeElapsed = 0;
 
     window.updateFocusUI = function() {
-        const mins = Math.floor(focusTimeLeft / 60); const secs = focusTimeLeft % 60;
-        document.getElementById('timeDisplay').innerText = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        const progress = document.getElementById('timerProgress'); const percentage = focusTimeLeft / focusTotalDuration; progress.style.strokeDashoffset = 283 - (283 * percentage);
-        document.getElementById('todayFocusMins').innerText = window.appState.focusStats[currentDateString] || 0;
+        let displayTime = window.isStopwatch ? focusTimeElapsed : focusTimeLeft;
+        const mins = Math.floor(displayTime / 60); const secs = displayTime % 60;
+        setTxt('timeDisplay', `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`);
         
-        // History List
-        const histList = document.getElementById('focusHistoryList');
-        if(window.appState.focusHistory.length === 0) { histList.innerHTML = '<p class="text-xs text-slate-400 italic font-medium px-1">No completed sessions yet.</p>'; } 
-        else {
-            histList.innerHTML = [...window.appState.focusHistory].reverse().slice(0, 5).map(h => `<div class="flex justify-between items-center bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm mb-2"><div><p class="text-sm font-extrabold text-slate-700">${h.duration} mins focus</p><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">${h.date} • ${new Date(h.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p></div><i class="fa-solid fa-check-circle text-emerald-500 text-lg"></i></div>`).join('');
+        const progress = document.getElementById('timerProgress');
+        if(progress) {
+            if(window.isStopwatch) progress.style.strokeDashoffset = 0;
+            else { const percentage = focusTimeLeft / focusTotalDuration; progress.style.strokeDashoffset = 283 - (283 * percentage); }
         }
+        setTxt('todayFocusMins', window.appState.focusStats[currentDateString] || 0);
+        
+        const histList = document.getElementById('focusHistoryList'); if(!histList) return;
+        if(window.appState.focusHistory.length === 0) { histList.innerHTML = '<p class="text-xs text-slate-400 italic font-medium px-1">No completed sessions yet.</p>'; } 
+        else { histList.innerHTML = [...window.appState.focusHistory].reverse().slice(0, 5).map(h => `<div class="flex justify-between items-center bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm mb-2"><div><p class="text-sm font-extrabold text-slate-700">${h.duration} mins focus</p><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">${h.date} • ${new Date(h.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p></div><i class="fa-solid fa-check-circle text-emerald-500 text-lg"></i></div>`).join(''); }
     }
 
     window.setTimerMode = function(mode, mins) {
         if(isFocusRunning) window.toggleTimer();
         document.querySelectorAll('.focus-mode-btn').forEach(b => { b.classList.remove('bg-white', 'shadow', 'text-slate-800'); b.classList.add('text-slate-500'); });
-        focusTimeLeft = mins * 60;
-        if(mode === 'pomodoro') document.getElementById('btnModePomodoro').classList.add('bg-white', 'shadow', 'text-slate-800');
-        else if(mode === 'shortBreak') document.getElementById('btnModeShort').classList.add('bg-white', 'shadow', 'text-slate-800');
-        else if(mode === 'longBreak') document.getElementById('btnModeLong').classList.add('bg-white', 'shadow', 'text-slate-800');
-        else if(mode === 'custom') document.getElementById('btnModeCustom').classList.add('bg-white', 'shadow', 'text-slate-800');
         
-        focusTotalDuration = focusTimeLeft; document.getElementById('timerStatus').innerText = "Ready"; document.getElementById('timerStatus').className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; window.updateFocusUI();
+        const btnId = mode === 'pomodoro' ? 'btnModePomodoro' : (mode === 'shortBreak' ? 'btnModeShort' : (mode === 'longBreak' ? 'btnModeLong' : (mode === 'stopwatch' ? 'btnModeStopwatch' : 'btnModeCustom')));
+        const activeBtn = document.getElementById(btnId); if(activeBtn) activeBtn.classList.add('bg-white', 'shadow', 'text-slate-800');
+        
+        window.isStopwatch = (mode === 'stopwatch');
+        const resetBtn = document.getElementById('btnResetTimer');
+        const ts = document.getElementById('timerStatus');
+
+        if(window.isStopwatch) {
+            focusTimeElapsed = 0; if(resetBtn) resetBtn.innerHTML = '<i class="fa-solid fa-floppy-disk text-emerald-500 text-xl"></i>';
+            if(ts) { ts.innerText = "Stopwatch"; ts.className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; }
+        } else {
+            focusTimeLeft = mins * 60; focusTotalDuration = focusTimeLeft; 
+            if(resetBtn) resetBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+            if(ts) { ts.innerText = "Ready"; ts.className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; }
+        }
+        window.updateFocusUI();
     }
 
-    window.setCustomTimer = function() {
-        const val = prompt("Enter focus time in minutes (e.g., 45):", "30");
-        if(val && !isNaN(val) && parseInt(val) > 0) window.setTimerMode('custom', parseInt(val));
-    }
+    window.setCustomTimer = function() { const val = prompt("Focus time in minutes (e.g., 45):", "30"); if(val && !isNaN(val) && parseInt(val) > 0) window.setTimerMode('custom', parseInt(val)); }
 
     window.toggleTimer = function() {
         const btn = document.getElementById('btnStartTimer'); const status = document.getElementById('timerStatus');
         if (isFocusRunning) {
             clearInterval(focusTimerInterval); isFocusRunning = false;
-            btn.innerText = "Resume"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); status.innerText = "Paused"; status.className = "text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-1 bg-orange-50 px-2 py-0.5 rounded";
+            if(btn) { btn.innerText = "Resume"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); }
+            if(status) { status.innerText = "Paused"; status.className = "text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-1 bg-orange-50 px-2 py-0.5 rounded"; }
         } else {
-            isFocusRunning = true; btn.innerText = "Pause"; btn.classList.replace('bg-brand-600', 'bg-orange-500'); status.innerText = "Focusing..."; status.className = "text-[10px] font-bold text-green-600 uppercase tracking-widest mt-1 bg-green-50 px-2 py-0.5 rounded";
+            isFocusRunning = true; 
+            if(btn) { btn.innerText = "Pause"; btn.classList.replace('bg-brand-600', 'bg-orange-500'); }
+            if(status) { status.innerText = window.isStopwatch ? "Counting..." : "Focusing..."; status.className = "text-[10px] font-bold text-green-600 uppercase tracking-widest mt-1 bg-green-50 px-2 py-0.5 rounded"; }
             
             focusTimerInterval = setInterval(() => {
-                focusTimeLeft--; window.updateFocusUI();
-                if(focusTimeLeft <= 0) {
-                    clearInterval(focusTimerInterval); isFocusRunning = false; btn.innerText = "Start"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); status.innerText = "Done!"; status.className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded";
-                    const completedMins = Math.floor(focusTotalDuration / 60); const todayStats = window.appState.focusStats[currentDateString] || 0;
-                    window.appState.focusStats[currentDateString] = todayStats + completedMins;
-                    window.appState.focusHistory.push({ id: Date.now(), date: currentDateString, duration: completedMins, timestamp: Date.now() });
-                    window.saveDataToCloud(); alert(`Timer Complete! +${completedMins} mins logged.`); window.setTimerMode('pomodoro', 25);
+                if(window.isStopwatch) {
+                    focusTimeElapsed++; window.updateFocusUI();
+                } else {
+                    focusTimeLeft--; window.updateFocusUI();
+                    if(focusTimeLeft <= 0) {
+                        clearInterval(focusTimerInterval); isFocusRunning = false; 
+                        if(btn) { btn.innerText = "Start"; btn.classList.replace('bg-orange-500', 'bg-brand-600'); }
+                        window.logFocusSession(Math.floor(focusTotalDuration / 60)); window.setTimerMode('pomodoro', 25);
+                    }
                 }
             }, 1000);
         }
     }
-    window.resetTimer = function() { if(isFocusRunning) window.toggleTimer(); focusTimeLeft = focusTotalDuration; document.getElementById('timerStatus').innerText = "Ready"; document.getElementById('timerStatus').className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; window.updateFocusUI(); }
+
+    window.resetTimer = function() { 
+        if(isFocusRunning) window.toggleTimer(); 
+        if(window.isStopwatch) {
+            const completedMins = Math.floor(focusTimeElapsed / 60);
+            if(completedMins > 0) { if(confirm(`Save ${completedMins} minutes to your history?`)) window.logFocusSession(completedMins); }
+            focusTimeElapsed = 0;
+            const ts = document.getElementById('timerStatus'); if(ts) { ts.innerText = "Stopwatch"; ts.className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; }
+        } else {
+            focusTimeLeft = focusTotalDuration; 
+            const ts = document.getElementById('timerStatus'); if(ts) { ts.innerText = "Ready"; ts.className = "text-[10px] font-bold text-brand-500 uppercase tracking-widest mt-1 bg-brand-50 px-2 py-0.5 rounded"; }
+        }
+        window.updateFocusUI(); 
+    }
+
+    window.logFocusSession = function(mins) {
+        if(mins <= 0) return;
+        const todayStats = window.appState.focusStats[currentDateString] || 0;
+        window.appState.focusStats[currentDateString] = todayStats + mins;
+        window.appState.focusHistory.push({ id: Date.now(), date: currentDateString, duration: mins, timestamp: Date.now() });
+        if(window.saveDataToCloud) window.saveDataToCloud(true); 
+        alert(`+${mins} mins logged!`); window.updateFocusUI();
+        const pa = document.getElementById('page-analysis'); if(pa && !pa.classList.contains('hidden')) window.renderAnalysis();
+    }
 </script>
 </body>
 </html>
-
-
